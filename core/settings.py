@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 import environ
 env = environ.Env()
@@ -23,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'SECRET_KEY'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -32,22 +33,37 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+BOOTSTRAP_ADMIN_SIDEBAR_MENU = False
 
 INSTALLED_APPS = [
+    'admin_tools_stats',  # this must be BEFORE 'admin_tools' and 'django.contrib.admin'
+    'django_nvd3',
+    'bootstrap_admin', # always before django.contrib.admin
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_ledger',
+    'easyaudit',
+    'report_builder',
 
-    'users.apps.UsersConfig'
+    'analytics.apps.AnalyticsConfig',
+    'users.apps.UsersConfig',
+    'assessments.apps.AssessmentsConfig',
+    'data_browser',
+    'slick_reporting',
+    'crispy_forms',
 ]
 
+WEASYPRINT_BASEURL = '/'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -63,6 +79,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.static',
+                'django.template.context_processors.media',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -71,8 +89,16 @@ TEMPLATES = [
         },
     },
 ]
-
+REPORT_BUILDER_GLOBAL_EXPORT = True
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    )
+}
 WSGI_APPLICATION = 'core.wsgi.application'
+DJANGO_EASY_AUDIT_ADMIN_SHOW_MODEL_EVENTS = True
+DJANGO_EASY_AUDIT_ADMIN_SHOW_AUTH_EVENTS = True
+DJANGO_EASY_AUDIT_ADMIN_SHOW_REQUEST_EVENTS = True
 
 
 # Database
@@ -119,16 +145,29 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    os.path.join(BASE_DIR, "static"),
 ]
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'static' / 'images'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
+
+
+PROTECTED_ROOT = os.path.join(BASE_DIR, "static_cdn", "protected_media")
+
+# STATIC_URL = 'static/'
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# STATICFILES_DIRS = [
+#     BASE_DIR / 'static',
+# ]
+
+# MEDIA_URL = 'media/'
+# MEDIA_ROOT = BASE_DIR / 'static' / 'images'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -140,12 +179,12 @@ LOGIN_URL = 'users:login'
 AUTHENTICATION_BACKENDS = [
     'users.backends.EmailOrUsernameModelBackend'
 ]
-
+# APPEND_SLASH=False
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_HOST = 'EMAIL_HOST'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-SERVER_EMAIL = env('SERVER_EMAIL')
+EMAIL_HOST_USER = 'EMAIL_HOST_USER'
+EMAIL_HOST_PASSWORD = 'EMAIL_HOST_PASSWORD'
+DEFAULT_FROM_EMAIL = 'DEFAULT_FROM_EMAIL'
+SERVER_EMAIL = 'SERVER_EMAIL'

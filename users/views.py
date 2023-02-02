@@ -4,6 +4,8 @@ from django.contrib.auth import (
     login,
     logout,
 )
+from django.http import JsonResponse, HttpResponse
+
 from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
@@ -12,10 +14,12 @@ from django.shortcuts import (
     redirect,
     render,
 )
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 
 from .forms import (
     CustomLoginForm,
+    DriversRegisterForm,
     RegisterForm,
     ForgetPasswordEmailCodeForm,
     ChangePasswordForm,
@@ -27,6 +31,10 @@ from .utils import (
     send_reset_password_code,
 )
 from .decorators import only_authenticated_user, redirect_authenticated_user
+
+
+
+User = get_user_model()
 
 @only_authenticated_user
 def home_view(request):
@@ -89,6 +97,24 @@ def registeration_view(request):
     else:
         form = RegisterForm()
     return render(request, 'users/register.html', {'form': form})
+
+def driver_registeration_view(request):
+    if request.method == 'POST':
+        form = DriversRegisterForm(request.POST or None)
+        if form.is_valid():
+            user = form.save(commit=False)
+            # user.full_name 
+            user.set_password('123456') # set default password
+            user.test_active = True
+            # user.date_joined = 
+            user.email = user.username 
+            user.is_active = True
+            user.source = 'Driver_Registeration'
+            user.save(True)
+            return redirect('users:driver_registeration_view')
+    else:
+        form = DriversRegisterForm()
+    return render(request, 'users/register.html', {'form': form,'custom':True})
 
 
 @redirect_authenticated_user
@@ -162,3 +188,33 @@ def reset_new_password_view(request):
     else:
         form = ChangePasswordForm()
     return render(request, 'users/new_password.html', {'form': form})
+
+
+
+
+def certificate_print(request):
+    users = User.objects.all()
+    if request.user.is_staff:
+        print(users)
+        return render(request, 'users/printing.html', {'users': users})
+
+    return render(request, 'users/printing.html')
+
+
+def user_search(request):
+    search_value = request.GET.get('search', '')
+    print(search_value)
+    users = User.objects.filter(username__contains=search_value)
+    
+    data = []
+    for custom_user in users:
+        data.append({
+            'username': custom_user.username,
+            'company': custom_user.company.name,
+            'status': custom_user.test_active,
+            'marks': custom_user.final_score,
+            'last_login': custom_user.last_login,
+            'current_attempts': custom_user.current_attempts,
+            'is_active': custom_user.is_active,
+        })
+    return JsonResponse(data, safe=False)

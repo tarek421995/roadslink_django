@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
 from django import forms
 from users.models import OtpCode
-
+User = get_user_model()
 
 class CustomLoginForm(forms.Form):
     username_or_email = forms.CharField(max_length=256, widget=forms.TextInput(
@@ -52,6 +52,40 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = get_user_model()
         fields = ("username", "email")
+
+
+# class DriversRegisterForm(UserCreationForm):
+#     def __init__(self, *args, **kwargs):
+#         super(DriversRegisterForm, self).__init__(*args, **kwargs)
+
+#         self.fields['username'].widget = widgets.TextInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+#         self.fields['company'].widget = widgets.TextInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+#         self.fields['email'].widget = widgets.EmailInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+#         self.fields['first_name'].widget = widgets.TextInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+#         self.fields['last_name'].widget = widgets.TextInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+#         self.fields[].widget = widgets.TextInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+#         self.fields['nationality'].widget = widgets.TextInput(attrs={'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'})
+
+#     def clean_email(self):
+#         email = self.cleaned_data['email']
+#         if get_user_model().objects.filter(email=email).exists():
+#             raise ValidationError("This email address is already exists.")
+#         return email
+
+
+
+class DriversRegisterForm(forms.ModelForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "username",'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}))
+    full_name = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "full_name",'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}))
+    company = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "company",'autocomplete': 'on', 'autocorrect': 'on', 'autocapitalize': 'on', 'spellcheck': 'true'}))
+    nationality = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "nationality",'autocomplete': 'on', 'autocorrect': 'on', 'autocapitalize': 'on', 'spellcheck': 'true'}))
+    contact = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "contact_info",'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}))
+
+    class Meta:
+        model = User
+        fields = ('username','first_name','last_name','contact','company','nationality' )
+
+
 
 
 class ForgetPasswordEmailCodeForm(forms.Form):

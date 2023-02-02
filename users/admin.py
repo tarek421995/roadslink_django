@@ -1,9 +1,12 @@
+import json
 from django import forms
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.forms import UsernameField
 from django.utils.translation import gettext_lazy as _
+from .models import CompanyCategory, DriverCategory, OtpCode
+from django.contrib import admin
 
 # Register your models here.
 from .models import (
@@ -57,6 +60,13 @@ class CustomUserChangeForm(UserChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+# admin.py
+def my_convert_function(value):
+    if (value == 'convert'):
+        return True, 'converted'
+    elif (type(value) == list):
+        return json.dumps(value)
+    return False, None
 
 class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
@@ -70,13 +80,21 @@ class CustomUserAdmin(UserAdmin):
         'source',
     )
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password')}),
+        (None, {'fields': ('username','full_name','company','driver_category','nationality', 'email', 'password')}),
         (_('Personal info'), {
-         'fields': ('first_name', 'last_name', 'bio', 'short_bio', 'profile_picture')}),
+         'fields': ('bio', 'current_attempts', 'profile_picture')}),
         (_('Permissions'), {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            'fields': ('is_active', 'test_active','is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     list_display_links = ('id', 'username')
     ordering = ('-id',)
+
+
+
+admin.site.register(CompanyCategory)
+admin.site.register(DriverCategory)
+
+admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(OtpCode)

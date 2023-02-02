@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+{% extends 'shared_layout/base.html' %}
+
+{%block title%}
+login
+{%endblock title%}
+{% block customcss %}
+<style>
+    #timer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        font-size: 36px;
+        color: #fff;
+        text-align: center;
+        background-color: #333;
+        padding: 10px;
+        border-radius: 5px;
+        width: 10%;
+    }
+
+    .flash-red {
+        animation: flash-red 0.9s linear infinite;
+    }
+
+    @keyframes flash-red {
+        0% {
+            color: red;
+        }
+
+        50% {
+            color: #333;
+        }
+
+        100% {
+            color: red;
+        }
+    }
+</style>
+{% endblock %}
+{%block contents%}
+{%if error%}
+<div class="alert text-center alert-danger" role="alert">
+    {{error}}
+</div>
+{%endif%}
+
+<div class="container text-center my-5">
+    <div class="card">
+        <div id="card-header" class="card-header">
+            <h2>{{ test.name }}</h2>
+        </div>
+        <div class="introduction-content" id="intro-video">
+            <h3>Introduction</h3>
+            <p>Welcome to the test, before you start please watch the following video for instructions.</p>
+            <video width="720" height="400" controls>
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+</div>
+<!-- Add an introduction content like( video and text) before start the actual test and timer in this page , after the user clicks on start the test hide the interduction content and replace it the test question-->
+<div class="introduction-content text-center" id="intro-content">
+    <p>Welcome to the {{ test.name }} test.</p>
+    <p>This test will consist of {{ test.number_question }} questions and you will have {{ test.time_limit }} minutes to
+        complete it.</p>
+    <p>Click on the "Start Test" button to begin the test and start the timer.</p>
+    <button class="btn btn-primary" id="start-test-btn">Start Test</button>
+</div>
+<div class="test-content" id="test-content" style="display:none;">
+    <div id="timer" class="m-3 " style="display: none;"></div>
+
+    <form method="post" action="{% url 'assessments:question_list' test.id %}">
+        {% csrf_token %}
+        <h3 class="text-center">English Questions</h3>
+        {% for question in questions %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <legend>Q{{ forloop.counter }} : {{ question.text }}</legend>
+                <small>Type of Question {{ question.type }}</small>
+            </div>
+            <div class="card-body">
+                {% if question.type == "audio" %}
+                <audio controls>
+                    <source src="{{ question.file.url }}" type="audio/mp3">
+                    Your browser does not support the audio element.
+                </audio>
+                {% endif %}
+                <ul class="list-group">
+                    {% for choice in question.choice_set.all %}
+                    <li class="list-group-item">
+                        <input type="radio" name="{{ question.id }}" value="{{ choice.id }}">
+                        {{ choice.text }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+        <input type="submit" class="btn btn-primary" value="Submit">
+    </form>
+</div>
+<script>
+    var startTestBtn = document.getElementById("start-test-btn");
+    var introContent = document.getElementById("intro-content");
+    var introVideo = document.getElementById("intro-video");
+    var testContent = document.getElementById("test-content");
+    var cardHeader = document.getElementById("card-header");
+
+    var timer = document.getElementById("timer");
+    var minutes = '{{ test.time_limit|safe }}'
+    var seconds = 0;
+    var intervalId;
+
+    // Show test content and hide introduction content when start button is clicked
+    startTestBtn.addEventListener("click", function () {
+        introContent.style.display = "none";
+        introVideo.style.display = "none";
+        cardHeader.style.display = "none";
+        testContent.style.display = "block";
+        timer.style.display = "block";
+        intervalId = setInterval(function () {
+            seconds--;
+            if (seconds < 0) {
+                minutes--;
+                seconds = 59;
+            }
+            if (minutes < 0) {
+                clearInterval(intervalId);
+                alert("Time's up! submitting the test automatically");
+                document.forms[0].submit();
+            }
+            else {
+                timer.innerHTML = minutes + " : " + (seconds < 10 ? 0 : "") + seconds;
+                if (minutes == 1 && seconds < 59) {
+                    $("#timer").addClass("flash-red");
+                }
+            }
+        }, 1000);
+    });
+</script>
+
+{%endblock contents%}

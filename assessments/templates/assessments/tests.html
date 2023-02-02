@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+{% extends 'shared_layout/base.html' %}
+
+{%block title%}
+Dashboard
+{%endblock title%}
+
+{%block contents%}
+{%if error%}
+<div class="alert alert-danger" role="alert">
+    {{error}}
+</div>
+{%endif%}
+<table id="cart" class="table cart-table">
+    <thead>
+        <tr>
+            <th>Test Name</th>
+            <th>Test Type</th>
+            <th>Number Of Questions</th>
+            <th>Duration</th>
+            <th>Passing Rate </th>
+            <th>Last Result</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody class='cart-body' id="adding">
+        {% if user.test_active %}
+        {% for test in tests %}
+        {% with last_attempt=test.testattempt_set.last %}
+        {% with passing_rate=user.driver_category.en_passing_rate %}
+        {% if test.type == 'en' %}
+        <tr class='cart-product'>
+            <td>
+                {% if last_attempt.final_score >= passing_rate %}
+                {{ test.name }} {{ test.type }}
+                <a class="btn btn-outline-info" href="{% url 'assessments:question_list' test.id %}">
+
+                {% else %}
+                <a class="btn btn-outline-info" href="{% url 'assessments:question_list' test.id %}">
+                    {{ test.name }} {{ test.type }}
+                </a>
+                {% endif %}
+            </td>
+            <td>English</td>
+            <td>{{ test.number_question }}</td>
+            <td> {{ test.time_limit}} Minutes</td>
+            <td> {{ passing_rate }}%</td>
+            <td> {% if last_attempt %}
+                    {{ last_attempt.final_score }}%
+                 {% else %}
+                0
+                {% endif %}
+            </td>
+            <td>
+                {% if last_attempt %}
+                {% if last_attempt.final_score >= passing_rate %}
+                    <span class="badge badge-success p-2">
+                        <a href=""
+                            class="btn btn-sm btn-outline-success ml-2 mb-2">
+                            Passed
+                        </a>
+                    </span>
+                    {% else %}
+                    <span class="btn btn-danger badge badge-danger p-2">
+                        Failed
+                    </span>
+                {% endif %}
+                {% else %}
+                <span class="badge text-bg-secondary">
+                    Not Taken
+                </span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% endwith %}
+        {% endwith %}
+        {% endfor %}
+        {% for test in tests %}
+        
+
+        {% if test.type == 'psyc' %}
+        {% for psycometric in test.psycometric_set.all %}
+        {% if psycometric.active %}
+        {% with psyco_last_attempt=psycometric.testattempt_set.last %}
+        <tr class='cart-product'>
+            <td>
+                {% if psyco_last_attempt.final_score >= user.driver_category.pscy_passing_rate %}
+                {{ psycometric.text }}
+                <a class="btn btn-outline-info" href="{% url 'assessments:psycometric_test' %}"></a>
+                {% else %}
+                <a class="btn btn-outline-info" href="{% url 'assessments:psycometric_test' %}">
+                    {{ psycometric.text }}
+                </a>
+                {% endif %}
+            </td>
+            <td>Psycometric</td>
+            <td>1</td>
+            <td> {{ psycometric.time_limit}} Minutes</td>
+            <td> {{ user.driver_category.pscy_passing_rate }}%</td>
+            <td> {% if psyco_last_attempt %} {{ psyco_last_attempt.final_score }}% {% else%}0{% endif %}</td>
+            <td>{% if psyco_last_attempt %}
+                {% if psyco_last_attempt.final_score >= user.driver_category.pscy_passing_rate %} <span
+                    class="badge text-bg-success"></span><a href=""
+                    class="btn btn-sm btn-outline-success ml-2 mb-2">
+                    Passed
+                </a>
+                    {% else %}
+                    <span class="badge text-bg-danger">Falied</span>
+                    {% endif %}
+                    {% else %}
+                    <span class="badge text-bg-secondary">
+                            Not Taken</span>
+                    {% endif %}</td>
+        </tr>
+        {% endwith %}
+        {% endif %}
+        {% endfor %}
+
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <span class="badge text-bg-secondary">You have no test activated</span>
+        {% endif %}
+    </tbody>
+</table>
+
+{%endblock contents%}
