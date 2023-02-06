@@ -2,7 +2,7 @@
 {% extends 'shared_layout/base.html' %}
 
 {%block title%}
-login
+Results
 {%endblock title%}
 {% block customcss %}
 <style>
@@ -75,7 +75,7 @@ login
     </thead>
     <tbody>
       <tr>
-        <td>{{ total_en_questions|length }}</td>
+        <td>{{ total_en_questions }}</td>
         <td><span class="btn btn-sm btn-outline-info"> {{total_en_answers }}</span></td>
         <td><span class="btn btn-sm btn-success"> {{ correct_en_answers }}</span></td>
       </tr>

@@ -31,7 +31,7 @@ class CustomUser(AbstractUser):
     full_name = models.CharField(_('full_name'), max_length=50, blank=True)
     profile_picture = models.ImageField(
         _('profile picture'), upload_to=get_profile_picture_filepath, null=True, blank=True)
-    driver_category = models.OneToOneField(
+    driver_category = models.ForeignKey(
         DriverCategory, on_delete=models.CASCADE, blank=True, null=True)
     bio = models.TextField(_('Bio'), max_length=500, blank=True)
     source = models.CharField(_('source'), max_length=50, blank=True)
@@ -39,7 +39,7 @@ class CustomUser(AbstractUser):
     current_attempts = models.PositiveIntegerField(default=0)
     test_active = models.BooleanField(default=False)
     final_score = models.PositiveIntegerField(default=0)
-    company = models.OneToOneField(
+    company = models.ForeignKey(
         CompanyCategory, on_delete=models.CASCADE, blank=True, null=True)
     nationality = models.CharField(_('nationality'), max_length=50, blank=True)
 
@@ -69,7 +69,9 @@ class CustomUser(AbstractUser):
 
 # @receiver(post_save, sender=CustomUser)
 # def create_certificate(sender,created, instance, **kwargs):
+#     instance.full_name = instance.username
     
+
 
 class OtpCode(HashableModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,

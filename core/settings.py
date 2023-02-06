@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 import environ
-import django_heroku
-django_heroku.settings(locals())
+# import django_heroku
+# django_heroku.settings(locals())
 env = environ.Env()
 
 environ.Env.read_env()
@@ -113,6 +113,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'd4t45vt2168k7n',
+#         'USER': os.getenv('POSTGRES_USER','mmtfkfllmuaslj'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD','550817563207f0677be52e1da543949666580fc208b4f81f0ff0cccdc0e218a8'),
+#         'HOST': os.getenv('POSTGRES_HOST','ec2-34-197-84-74.compute-1.amazonaws.com'),
+#         'PORT': os.getenv('POSTGRES_PORT', 5432)
+
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -143,7 +154,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

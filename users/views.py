@@ -17,6 +17,8 @@ from django.shortcuts import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 
+from assessments.models import Cretificate
+from django.db.models import Prefetch
 from .forms import (
     CustomLoginForm,
     DriversRegisterForm,
@@ -100,22 +102,42 @@ def registeration_view(request):
 
 def driver_registeration_view(request):
     if request.method == 'POST':
-        form = DriversRegisterForm(request.POST or None)
+        form = DriversRegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            # user.full_name 
-            user.set_password('123456') # set default password
+            user.set_password('123456')
             user.test_active = True
-            # user.date_joined = 
-            user.email = user.username 
+            user.email = user.username
+            user.full_name = user.username
             user.is_active = True
             user.source = 'Driver_Registeration'
-            user.save(True)
+            user.save()
             return redirect('users:driver_registeration_view')
     else:
         form = DriversRegisterForm()
-    return render(request, 'users/register.html', {'form': form,'custom':True})
+    return render(request, 'users/driver_registr.html', {'form': form, 'custom': True})
 
+
+def register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        driver_category = request.POST.get('driver_category')
+        contact = request.POST.get('contact')
+        company = request.POST.get('company')
+        nationality = request.POST.get('nationality')
+        user = User.objects.create(username=username,driver_category=driver_category,contact=contact,company=company,nationality=nationality)
+        user.set_password('123456')
+        user.test_active = True
+        user.email = username
+        user.full_name = username
+        user.is_active = True
+        user.source = 'Driver_Registeration'
+        user.save()
+        # process the data and save to database
+        print(username)
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
 @redirect_authenticated_user
 def forgot_password_view(request):
@@ -193,28 +215,38 @@ def reset_new_password_view(request):
 
 
 def certificate_print(request):
-    users = User.objects.all()
+    users = User.objects.all().order_by('-last_login').prefetch_related(
+        Prefetch('certificate', queryset=Cretificate.objects.only('final_en_score', 'final_psyco_score')))
     if request.user.is_staff:
-        print(users)
         return render(request, 'users/printing.html', {'users': users})
-
     return render(request, 'users/printing.html')
 
-
+# def check_user_certificate(user):
+#     if hasattr(user, 'certificate'):
+#         return True
+#     else:
+#         return False
+    
 def user_search(request):
     search_value = request.GET.get('search', '')
-    print(search_value)
-    users = User.objects.filter(username__contains=search_value)
-    
-    data = []
-    for custom_user in users:
-        data.append({
-            'username': custom_user.username,
-            'company': custom_user.company.name,
-            'status': custom_user.test_active,
-            'marks': custom_user.final_score,
-            'last_login': custom_user.last_login,
-            'current_attempts': custom_user.current_attempts,
-            'is_active': custom_user.is_active,
-        })
+    user_data = User.objects.filter(username__contains=search_value) \
+                        .values('id', 'username', 'company__name', 'test_active', 'last_login', 'current_attempts', 'is_active') \
+                        .prefetch_related('company')
+    user_ids = [user['id'] for user in user_data]
+    certificate_data = Cretificate.objects.filter(user_id__in=user_ids) \
+                        .values('user_id', 'final_en_score', 'final_psyco_score')
+
+    certificate_data_dict = {cert['user_id']: cert for cert in certificate_data}
+
+    data = [{
+        'username': user['username'],
+        'company': user['company__name'],
+        'status': user['test_active'],
+        'last_login': user['last_login'],
+        'final_en_score': certificate_data_dict.get(user['id'], {}).get('final_en_score', ''),
+        'final_psyco_score': certificate_data_dict.get(user['id'], {}).get('final_psyco_score', ''),
+        'current_attempts': user['current_attempts'],
+        'is_active': user['is_active'],
+    } for user in user_data]
+
     return JsonResponse(data, safe=False)

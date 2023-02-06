@@ -8,6 +8,7 @@ from django import forms
 from users.models import OtpCode
 User = get_user_model()
 
+
 class CustomLoginForm(forms.Form):
     username_or_email = forms.CharField(max_length=256, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Username or Email'}))
@@ -73,19 +74,24 @@ class RegisterForm(UserCreationForm):
 #         return email
 
 
-
 class DriversRegisterForm(forms.ModelForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "username",'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}))
-    full_name = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "full_name",'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}))
-    company = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "company",'autocomplete': 'on', 'autocorrect': 'on', 'autocapitalize': 'on', 'spellcheck': 'true'}))
-    nationality = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "nationality",'autocomplete': 'on', 'autocorrect': 'on', 'autocapitalize': 'on', 'spellcheck': 'true'}))
-    contact = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control",'placeholder': "contact_info",'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}))
-
     class Meta:
         model = User
-        fields = ('username','first_name','last_name','contact','company','nationality' )
+        fields = ['username', 'driver_category', 'contact',
+                  'final_score', 'company', 'nationality']
 
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs['class'] = 'form-control'
+        self.fields['username'].widget.attrs['placeholder'] = 'Username'
+        self.fields['driver_category'].widget.attrs['class'] = 'form-control'
+        self.fields['driver_category'].widget.attrs['placeholder'] = 'Driver Category'
+        self.fields['contact'].widget.attrs['class'] = 'form-control'
+        self.fields['contact'].widget.attrs['placeholder'] = 'Contact Information'
+        self.fields['company'].widget.attrs['class'] = 'form-control'
+        self.fields['company'].widget.attrs['placeholder'] = 'Company'
+        self.fields['nationality'].widget.attrs['class'] = 'form-control'
+        self.fields['nationality'].widget.attrs['placeholder'] = 'Nationality'
 
 
 class ForgetPasswordEmailCodeForm(forms.Form):

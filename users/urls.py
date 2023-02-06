@@ -7,6 +7,7 @@ from .views import (
     login_view,
     logout_view,
     forgot_password_view,
+    register,
     registeration_view,
     check_otp_view,
     check_reset_otp_view,
@@ -26,6 +27,8 @@ urlpatterns = [
     path('user_search/', user_search, name='user_search'),
     path('driver-register/', driver_registeration_view,
          name='driver_registeration_view'),
+    path('driver/', register,
+         name='driver_registeration'),
 
     path('forgot-password/', forgot_password_view, name='forgot_password'),
     path('activate-email/', check_otp_view, name='activate_email'),

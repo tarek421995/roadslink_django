@@ -3,7 +3,7 @@
 {% extends 'shared_layout/base.html' %}
 
 {%block title%}
-login
+ENGLISH TEST
 {%endblock title%}
 {% block customcss %}
 <style>
@@ -54,19 +54,19 @@ login
         <div class="introduction-content" id="intro-video">
             <h3>Introduction</h3>
             <p>Welcome to the test, before you start please watch the following video for instructions.</p>
-            <video width="720" height="400" controls>
-                <source src="" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+
+            <iframe width="720" height="500" src="{{test.tutorial_path}}" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
         </div>
     </div>
 </div>
 <!-- Add an introduction content like( video and text) before start the actual test and timer in this page , after the user clicks on start the test hide the interduction content and replace it the test question-->
 <div class="introduction-content text-center" id="intro-content">
-    <p>Welcome to the {{ test.name }} test.</p>
-    <p>This test will consist of {{ test.number_question }} questions and you will have {{ test.time_limit }} minutes to
+    <p>Welcome to the <b>{{ test.name }} </b>test.</p>
+    <p>This test will consist of <b>{{ test.number_question }}</b> questions and you will have <b>{{ test.time_limit}}</b> minutes to
         complete it.</p>
-    <p>Click on the "Start Test" button to begin the test and start the timer.</p>
+    <p>{{test.descriptions}}</p>
     <button class="btn btn-primary" id="start-test-btn">Start Test</button>
 </div>
 <div class="test-content" id="test-content" style="display:none;">

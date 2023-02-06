@@ -1,11 +1,17 @@
 from datetime import timedelta
+import io
+import json
 from django.utils import timezone
 from django.http import HttpResponse,HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import (
     logout,
 )
+import pandas as pd
+
 from django.db.models.functions import Now
+from django.http import FileResponse
+import re
 
 from assessments.forms import SingleChoiceQuestionForm
 from users.views import logout_view
@@ -148,8 +154,8 @@ def psycometric_tests_detail(request,psyco_id):
     psyco = Psycometric.objects.get_object_or_404(id=psyco_id)
     context = {'question': psyco, 'test': test}
     return render(request, 'assessments/psycometric_test.html', context)
- 
- 
+
+
 def question_detail(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     choices = list(Choice.objects.filter(question=question))
@@ -182,6 +188,7 @@ def english_questions(request):
         context = {'questions': questions}
         return render(request, 'all_questions.html', context)
 
+from django.core.files.base import ContentFile
 
 
 def results(request):
@@ -205,33 +212,85 @@ def results(request):
 
         psyco_sum = 0
         i=0
-        certificate.test_attemp.set('')
-        certificate.test_attemp.add(en.last())
+        
+        certificate.test_attemps.set('')
+        test = en.last().test
+        print(test)
+        certificate.test_attemps.add(en.last())
         psyco_list = []
         for psyco in all_psyco:
             psyco_list.append(psyco)
             i=+1
             psyco_sum =+ psyco.final_score
         psyco_avg = psyco_sum / i
-        certificate.test_attemp.add(*psyco_list)
+        certificate.test_attemps.add(*psyco_list)
         certificate.final_en_score = en.last().final_score
         certificate.final_psyco_score = psyco_avg
         certificate.save()
-        print(certificate.test_attemp.count())
+        print(certificate.test_attemps.count())
+        
     
     context = {
-        'total_en_questions': list(Question.objects.all()),
+        'total_en_questions': test.number_question,
         'total_en_answers': user_answers.count(),
         'correct_en_answers': correct_answers.count(),
         'current_attempts':current_attempts.order_by('-type')
         
-        
     }
     return render(request, 'assessments/results.html', context)
 
+# from django.views.decorators.csrf import csrf_exempt
+from django.core.files import File
+# @csrf_exempt
+def audio_qustion(request):    
+    if request.method == 'POST':
+        test_id = request.POST.get('test_id')
+        audios_file = request.FILES.getlist('audioFile[]', None)
+        excl_file = request.FILES.get('json')
+        questions_file = request.FILES.get('Questions')
+        df = pd.read_excel(excl_file)
+        test = Test.objects.get(id=test_id)
+        for index, row in df.iterrows():
+            print('tarek')
+            # create a question object and save it
+            question = Question(test=test, active=True, text=row["Name"], type='audio', file=None)
+            question.save()
+            
+            # create choice objects for the question and save them
+            correct_answer = row["Correct Answer"]
+            choice1 = Choice(question=question, text=row["Option A"], is_correct=(correct_answer == row["Option A"]))
+            choice1.save()
+            choice2 = Choice(question=question, text=row["Option B"], is_correct=(correct_answer == row["Option B"]))
+            choice2.save()
+            choice3 = Choice(question=question, text=row["Option C"], is_correct=(correct_answer == row["Option C"]))
+            choice3.save()
+            choice4 = Choice(question=question, text=row["Option D"], is_correct=(correct_answer == row["Option D"]))
+            choice4.save()
+            file_name = row["File Name"]
+            if file_name:
+                try:
+                    for audio_file in audios_file:
+                        if audio_file.name == file_name:
+                            # audio_file = open(audio_file, "rb")
+                            # question.file = audio_file
+                            question.file.save(f"{file_name}.mp3", File(audio_file), save=True)
+                            # question.save()
+                            break
+                except FileNotFoundError:
+                    pass
+                    
+        return HttpResponse("File uploaded successfully")
 
-# messages.debug(request, '%s SQL statements were executed.' % count)
-# messages.info(request, 'Three credits remain in your account.')
-# messages.success(request, 'Profile details updated.')
-# messages.warning(request, 'Your account expires in three days.')
-# messages.error(request, 'Document deleted.')
+    # return JsonResponse({'success': False})
+    return render(request, 'assessments/audio.html')
+
+
+def text_qustion(request):    
+    if request.method == 'POST':
+        test_id = request.POST.get('test_id')
+        excl_file = request.FILES.get('json')
+        
+        return HttpResponse("File uploaded successfully")
+
+    # return JsonResponse({'success': False})
+    return render(request, 'assessments/audio.html')

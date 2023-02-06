@@ -2,47 +2,49 @@
 
 {% block contents %}
 <h1 class="text-center">User List</h1>
-
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <form id="search-form">
-                <div class="form-group">
-                    <input type="text" name="search" id="search-field" class="form-control"
-                        placeholder="Search users by username or email">
-                </div>
-            </form>
+  <div class="row">
+    <div class="col-md-12">
+      <form id="search-form">
+        <div class="form-group">
+          <input type="text" name="search" id="search-field" class="form-control" placeholder="Search users by username or email">
         </div>
+      </form>
     </div>
+  </div>
 </div>
-
 <table id="user-table" class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Company</th>
-            <th>Status</th>
-            <th>Marks</th>
-            <th>Last Login</th>
-            <th>Current Attempts</th>
-            <th>Active</th>
-            <th>Certificate PDF</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.username }}</td>
-            <td>{{ user.company }}</td>
-            <td>{{ user.status }}</td>
-            <td>{{ user.marks }}</td>
-            <td>{{ user.last_login }}</td>
-            <td>{{ user.current_attempts }}</td>
-            <td>{% if user.is_active %} Yes {% else %} No {% endif %}</td>
-            <td><a href="{% url 'assessments:generate_pdf' user.id %}">PDF</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Company</th>
+      <th>Last Login</th>
+      <th>Current Attempts</th>
+      <th>Test Activated</th>
+      <th>final_en_score</th>
+      <th>final_psyco_score</th>
+      <th>PDF</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.username }}</td>
+      <td>{{ user.company.name }}</td>
+      <td>{{ user.last_login }}</td>
+      <td>{{ user.current_attempts }}</td>
+      <td>{% if user.test_active %} Yes {% else %} No {% endif %}</td>
+      {% if user.certificate %}
+      <td>{{ user.certificate.final_en_score }}</td>
+      <td>{{ user.certificate.final_psyco_score }}</td>
+      <td><a href="{% url 'assessments:generate_pdf' user.id %}">PDF</a></td>
+      {% else %}
+      <td>0</td>
+      <td>0</td>
+      <td>NOT</td>
+      {% endif %}
+    {% endfor %}
+  </tbody>
 </table>
 <script type="text/javascript">
     $(document).ready(function () {
@@ -65,11 +67,15 @@
                                 "<tr>" +
                                 "<td>" + user.username + "</td>" +
                                 "<td>" + user.company + "</td>" +
-                                "<td>" + user.status + "</td>" +
-                                "<td>" + user.marks + "</td>" +
                                 "<td>" + user.last_login + "</td>" +
                                 "<td>" + user.current_attempts + "</td>" +
                                 "<td>" + (user.is_active ? "Yes" : "No") + "</td>" +
+
+                                "<td>" + user.final_en_score + "</td>" +
+                                "<td>" + user.final_psyco_score + "</td>" +
+                                
+                                
+                                
                                 "</tr>"
                             );
                         });

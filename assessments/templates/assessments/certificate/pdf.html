@@ -2,7 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 <title></title>
-
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
  <br/>
 <style type="text/css">
@@ -20,8 +19,8 @@
 </head>
 <body bgcolor="#A0A0A0" vlink="blue" link="blue">
 <div id="page1-div" style="position:relative;width:1262px;height:892px;">
-<img width="1262" height="892" src="http://localhost:8000/media/test/1395218424/1395218424.png" alt="background image"/>
-<p style="position:absolute;top:116px;left:47px;white-space:nowrap" class="ft10"><b>    Category :&#160;</b></p>
+<img width="1262" height="892" src="http://localhost:8000/{{test.certificate_image.url}}" alt="background image"/>
+<p style="position:absolute;top:116px;left:47px;white-space:nowrap" class="ft10"><b>  Category :&#160;</b></p>
 <p style="position:absolute;top:219px;left:429px;white-space:nowrap" class="ft11"><i>This certificate is proudly presented to</i></p>
 <p style="position:absolute;top:329px;left:370px;white-space:nowrap" class="ft11"><i>for the successful completion of following courses :</i></p>
 <p style="position:absolute;top:818px;left:55px;white-space:nowrap" class="ft12">Authorized signature and stamp</p>
@@ -31,17 +30,16 @@
 <p style="position:absolute;top:818px;left:1076px;white-space:nowrap" class="ft12">Date</p>
 <p style="position:absolute;top:461px;left:417px;white-space:nowrap" class="ft13">out of 100</p>
 <p style="position:absolute;top:461px;left:778px;white-space:nowrap" class="ft13">out of 150</p>
-<p style="position:absolute;top:776px;left:1076px;white-space:nowrap" class="ft14">01/03/2020</p>
-<p style="position:absolute;top:775px;left:353px;white-space:nowrap" class="ft15">72109C87</p>
-<p style="position:absolute;top:266px;left:549px;white-space:nowrap" class="ft16"><b>Amjad Ali</b></p>
+<p style="position:absolute;top:776px;left:1076px;white-space:nowrap" class="ft14">{{data.created_at|date:"M d, Y" }}</p>
+<p style="position:absolute;top:775px;left:353px;white-space:nowrap" class="ft15">{{data.code}}</p>
+<p style="position:absolute;top:266px;left:549px;white-space:nowrap" class="ft16"><b>{{data.user.username}}</b></p>
 <p style="position:absolute;top:414px;left:357px;white-space:nowrap" class="ft10"><b>RTA Psychometric Tests&#160;</b></p>
 <p style="position:absolute;top:414px;left:727px;white-space:nowrap" class="ft10"><b>RTA English Test Overseas&#160;</b></p>
-<p style="position:absolute;top:461px;left:387px;white-space:nowrap" class="ft13">92</p>
-<p style="position:absolute;top:461px;left:744px;white-space:nowrap" class="ft13">140</p>
-<p style="position:absolute;top:775px;left:782px;white-space:nowrap" class="ft15">&#160;National Taxi&#160;</p>
-<p style="position:absolute;top:775px;left:566px;white-space:nowrap" class="ft15">WW1813722</p>
-<p style="position:absolute;top:121px;left:145px;white-space:nowrap" class="ft17">&#160;Taxi&#160;</p>
-<p style="position:absolute;top:898px;left:990px;white-space:nowrap" class="ft19">&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;1 / 1</p>
+<p style="position:absolute;top:461px;left:380px;white-space:nowrap" class="ft13">{{data.final_en_score|floatformat:1 }}</p>
+<p style="position:absolute;top:461px;left:740px;white-space:nowrap" class="ft13">{{data.final_psyco_score|floatformat:1 }}</p>
+<p style="position:absolute;top:775px;left:782px;white-space:nowrap" class="ft15">&#160;{{data.user.company.name}}&#160;</p>
+<p style="position:absolute;top:775px;left:566px;white-space:nowrap" class="ft15">WW{{data.user.id}}</p>
+<p style="position:absolute;top:117px;left:145px;white-space:nowrap" class="ft17">&#160;<b>{{data.user.driver_category.name}}</b>&#160;</p>
 </div>
 </body>
 </html>

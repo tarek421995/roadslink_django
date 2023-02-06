@@ -72,10 +72,9 @@ Assessments
         <div class="introduction-content" id="intro-video">
             <h3>Introduction</h3>
             <p>Welcome to the test, before you start please watch the following video for instructions.</p>
-            <video width="720" height="400" controls>
-                <source src="test_introduction.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+            <iframe width="720" height="500" src="{{question.tutorial_path}}" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
         </div>
     </div>
 </div>
@@ -84,7 +83,7 @@ Assessments
     <p>Welcome to the {{ test.name }} test.</p>
     <p>This test will consist of {{ test.number_question }} questions and you will have {{ test.time_limit }} minutes to
         complete it.</p>
-    <p>Click on the "Start Test" button to begin the test and start the timer.</p>
+    <p>{{ quetion.description }} .</p>
     <button class="btn btn-primary" id="start-test-btn">Start Test</button>
 </div>
 <div id="timer" class="m-3 " style="display: none;"></div>

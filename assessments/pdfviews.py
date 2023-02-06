@@ -10,8 +10,8 @@ User = get_user_model()
 def generate_pdf(request, user_id):
     # Render the HTML template
     user = User.objects.filter(id=user_id).first()
-    print(user.print_certificate)
-    # certifiicate = user.cretificate
+    certificate = user.certificate
+    test_attemp = certificate.test_attemps.all().first().test
     mycss = CSS(string=(
         "@page longpage {\n"
         "    size: 400mm 400mm;\n"
@@ -21,7 +21,7 @@ def generate_pdf(request, user_id):
         "}\n"
     ))
     
-    html_template = render(request, 'assessments/certificate/pdf.html', {'data': user})
+    html_template = render(request, 'assessments/certificate/pdf.html', {'data': certificate ,'test':test_attemp})
 
     # Convert the HTML to a PDF
     pdf_file = HTML(string=html_template.content.decode('utf-8')).write_pdf(stylesheets=[mycss])
