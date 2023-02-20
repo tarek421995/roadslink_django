@@ -1,0 +1,111 @@
+<!-- [ navigation menu ] start -->
+<nav class="pcoded-navbar">
+    <div class="navbar-wrapper" style="font-weight: bold;">
+        <div class="navbar-brand header-logo">
+            <a href="{% url 'staff_dashboard' %}" class="b-brand">
+                <div class="b-bg">
+                    <i class="feather icon-trending-up"></i>
+                </div>
+                <span class="b-title">LMS Dashboard</span>
+            </a>
+            <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+        </div>
+        <div class="navbar-content scroll-div">
+            <ul class="nav pcoded-inner-navbar">
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Navigation</label>
+                </li>
+                {%if user.is_authenticated%}
+                        
+                    {% if user.is_staff %}
+                        <li data-username="LMS Dashboard" 
+                            class="nav-item {% if 'index' in segment %} active {% endif %}">
+                            <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
+                                    class="pcoded-mtext">Go back to WebSite</span></a>
+                        </li>
+                        {% if perms.assessments.add_cretificate %}
+                        <li data-username="Current Active Users" 
+                            class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                            <a class="nav-link" href="{%url 'users:certificate_print'%}">              
+                            <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                                    <span class="pcoded-mtext">Current Active Users</span></a>
+                        </li> 
+                        {% endif %}
+                        {% if perms.users.add_customuser %}
+                        <li data-username="Register New User" 
+                            class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                            <a class="nav-link" href="{%url 'users:driver_registeration_view'%}">
+                            <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                                    <span class="pcoded-mtext">Register New User</span></a>
+                        </li> 
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <li data-username="LMS Dashboard" 
+                                class="nav-item {% if 'index' in segment %} active {% endif %}">
+                                <a href="/data-browser" class="nav-link "><span class="pcoded-micon"><i class="feather icon-pie-chart"></i></span><span
+                                        class="pcoded-mtext">Build Report</span></a>
+                            </li>
+                            <!-- <li data-username="LMS Dashboard" 
+                                class="nav-item {% if 'index' in segment %} active {% endif %}">
+                                <a href="/ledger" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span
+                                        class="pcoded-mtext">Financial</span></a>
+                            </li> -->
+                            <li data-username="LMS Dashboard" 
+                                class="nav-item {% if 'index' in segment %} active {% endif %}">
+                                <a href="{% url 'users:generate_company_invoice' %}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span
+                                        class="pcoded-mtext">Company invoices</span></a>
+                            </li>
+                            <li data-username="Final Result" 
+                            class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                            <a class="nav-link" href="{%url 'assessments:results'%}">
+                            <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                                    <span class="pcoded-mtext">Final Result</span></a>
+                        </li> 
+                        {% endif %}
+                    {% else %}
+                        <li data-username="Assessment" 
+                            class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                            <a class="nav-link" href="{%url 'assessments:test_list'%}">
+                            <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                                    <span class="pcoded-mtext">Assessment List</span></a>
+                        </li> 
+                        {% if user.testattempt_set.count > 0  %}
+                        <li data-username="Final Result" 
+                            class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                            <a class="nav-link" href="{%url 'assessments:results'%}">
+                            <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                                    <span class="pcoded-mtext">Final Result</span></a>
+                        </li> 
+                        {% endif %}
+                    {% endif %}
+                    <li data-username="Profile Page" 
+                        class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                        <a href="{% url 'users:edit_profile' %}" class="nav-link">
+                            <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                                <span class="pcoded-mtext">Profile Page</span></a>
+                    </li> 
+                    <li class="nav-item pcoded-menu-caption">
+                        <label>UI Element</label>
+                    </li>
+                    <li data-username="Disabled Menu" class="nav-item">
+                        <a href="{% url 'users:logout' %}" class="nav-link">
+                            <span class="pcoded-micon"><i class="feather icon-power"></i></span><span class="pcoded-mtext">Logout</span>
+                        </a>
+                    </li> 
+                {% else %}
+                    <li data-username="Authentication Sign up Sign in reset password Change password Personal information profile settings map form subscribe"
+                        class="nav-item pcoded-hasmenu">
+                        <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i class="feather icon-lock"></i></span><span
+                                class="pcoded-mtext">Authentication</span></a>
+                        <!-- <ul class="pcoded-submenu">
+                            <li class=""><a href="/register.html" class="" target="_blank">Sign UP</a></li>
+                            <li class=""><a href="/login.html" class="" target="_blank">Sign IN</a></li>
+                        </ul> -->
+                    </li>
+                {% endif %}
+                             
+            </ul>
+        </div>
+    </div>
+</nav>
+

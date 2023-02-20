@@ -5,7 +5,7 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.forms import UsernameField
 from django.utils.translation import gettext_lazy as _
-from .models import CompanyCategory, DriverCategory, OtpCode
+from .models import AgentCategory, CompanyCategory, Contact, Cretificate, DriverAge, DriverCategory, DriverNationality, Invocies, InvociesFile, OtpCode
 from django.contrib import admin
 
 # Register your models here.
@@ -80,7 +80,7 @@ class CustomUserAdmin(UserAdmin):
         'source',
     )
     fieldsets = (
-        (None, {'fields': ('username','full_name','company','driver_category','nationality', 'email', 'password')}),
+        (None, {'fields': ('username','full_name','company','agents','driver_category','nationality', 'email', 'password')}),
         (_('Personal info'), {
          'fields': ('bio', 'current_attempts', 'profile_picture')}),
         (_('Permissions'), {
@@ -98,3 +98,17 @@ admin.site.register(DriverCategory)
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(OtpCode)
+admin.site.register(Contact)
+admin.site.register(DriverAge)
+admin.site.register(DriverNationality)
+
+admin.site.register(InvociesFile)
+
+admin.site.register(AgentCategory)
+
+admin.site.register(Invocies)
+admin.site.register(Cretificate)
+
+
+
+

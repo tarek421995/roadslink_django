@@ -18,20 +18,28 @@ from django.conf import settings
 from django.urls import path, include, re_path
 from django.conf.urls.static import static
 
-from core.view import TotalProductSales
+# from core.view import  home_page
 # from .admin_site import admin_site
 from django.contrib import admin
+from .view import staff_dashboard
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin_tools_stats/', include('admin_tools_stats.urls')),
-    re_path(r'^report_builder/', include('report_builder.urls')),
+    # re_path(r'^report_builder/', include('report_builder.urls')),
     path('', include('users.urls', namespace="users")),
     path('assessments/', include('assessments.urls', namespace="assessments")),
     path("data-browser/", include("data_browser.urls")),
-    path('report/', TotalProductSales.as_view()),
-    path('ledger/', include('django_ledger.urls', namespace='django_ledger')),
-]
+    # path('report/', TotalProductSales.as_view()),
+    path('blogs/',include('blog.urls',namespace="blogs")),
+    path('dashboard/',include('dashboard.urls',namespace="dashboard")),
+    path('staff-dashboard/', staff_dashboard, name='staff_dashboard'),
+    # path('ledger/', include('django_ledger.urls', namespace='django_ledger')),
+    # path('', home_page, name='home'),
+    ]
+
 
 if settings.DEBUG:
     urlpatterns = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

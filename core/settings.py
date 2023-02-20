@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from django_archive import archivers
 import os
 from pathlib import Path
 import environ
@@ -41,7 +42,7 @@ BOOTSTRAP_ADMIN_SIDEBAR_MENU = False
 INSTALLED_APPS = [
     'admin_tools_stats',  # this must be BEFORE 'admin_tools' and 'django.contrib.admin'
     'django_nvd3',
-    'bootstrap_admin', # always before django.contrib.admin
+    'bootstrap_admin',  # always before django.contrib.admin
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,22 +50,40 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_ledger',
+    # 'django_ledger',
     'easyaudit',
-    'report_builder',
+    'django_archive',
 
+    # 'report_builder',
+    'blog.apps.BlogConfig',
+    'dashboard.apps.DashboardConfig',
     'analytics.apps.AnalyticsConfig',
     'users.apps.UsersConfig',
     'assessments.apps.AssessmentsConfig',
     'data_browser',
     'slick_reporting',
     'crispy_forms',
+    'django_quill',
+
+    'django.contrib.humanize',
+    'django_cleanup.apps.CleanupConfig',
+
 ]
+DJANGO_LEDGER_CURRENCY_SYMBOL =  'د.إ'
+CURRENCIES = {
+    'USD': '$',  # US Dollar
+    'EUR': '€',  # Euro
+    'AED': 'د.إ',  # UAE Dirham
+    # Add more currencies here...
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -73,6 +92,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+ARCHIVE_FORMAT = archivers.ZIP
+
+ARCHIVE_EXCLUDE_APPS = ['django_ledger', 'easyaudit']
 
 TEMPLATES = [
     {
@@ -87,6 +110,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog.context_processors.globalVariable',  # blog context
+                'core.context_processors.cfg_assets_root',
+
             ],
         },
     },
@@ -98,10 +124,13 @@ REST_FRAMEWORK = {
     )
 }
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = "core.asgi.application"
+
 DJANGO_EASY_AUDIT_ADMIN_SHOW_MODEL_EVENTS = True
 DJANGO_EASY_AUDIT_ADMIN_SHOW_AUTH_EVENTS = True
 DJANGO_EASY_AUDIT_ADMIN_SHOW_REQUEST_EVENTS = True
 
+DATA_UPLOAD_MAX_NUMBER_FILES = 350
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -109,10 +138,34 @@ DJANGO_EASY_AUDIT_ADMIN_SHOW_REQUEST_EVENTS = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
+# DATABASE_ROUTERS = ['core.routers.SecondaryDatabaseRouter']
+
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "MAX_ENTRIES": 500,
+#         "CULL_FREQUENCY": 2,
+        
+#         "OPTIONS": {
+#             'db': '10',
+#             'parser_class': 'redis.connection.PythonParser',
+#             'pool_class': 'redis.BlockingConnectionPool',
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient"
+#         },
+#         "KEY_PREFIX": "roadslink"
+#     }
+# }
+
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# SESSION_CACHE_ALIAS = 'default'
+# # Cache time to live is 15 minutes.
+# CACHE_TTL = 60 * 15
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -164,7 +217,7 @@ STATICFILES_DIRS = [
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")
 
-
+ASSETS_ROOT = '/static/assets'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
 

@@ -1,66 +1,589 @@
-{% extends 'shared_layout/base.html' %} {%block title%} register {%endblock title%} {%block contents%} {%if error%}
+{% extends 'shared_layout/lms_dashboard.html' %} {%block title%} Register {%endblock title%}
+{%block contents %}
+{%if error%}
 <div class="alert alert-danger" role="alert">
-    {{error}}
+  {{error}}
 </div>
 {%endif%}
-<div class="container">
-    <form id="registration-form">
-  <div class="form-group">
-    <label for="username">Username</label>
-    <input type="text" class="form-control" id="username" placeholder="Username">
+<div class="pcoded-main-container">
+  <div class="pcoded-wrapper">
+    <div class="pcoded-content " style="color: #7a7171; font-weight: bold;">
+      <div class="pcoded-inner-content">
+        <div class="contanier ">
+          <div class="row">
+            <div class="mx-5 col-9">
+              <form id="registration-form">
+                <div class="row">
+                  <div class='col-lg-6 col-sm-12 col-md-12 '>
+                    <div class="form-group">
+                      <label for="username">Username</label>
+                      <input type="text" class="my-2 form-control" id="username" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                      <label for="full_name">Full Name</label>
+                      <input type="text" class="my-2 form-control" id="full_name" placeholder="Fill OR Search users">
+                    </div>
+
+                    {% if companies.count > 9 %}
+                    <div class="form-group">
+                      <label for="Company">Company</label>
+                      <select id="company-dropdown" class="my-2 form-control">
+                        {% for company in companies %}
+                        <option value="{{ company.name }}">{{ company }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="agent-dropdown">Agent:</label>
+                      <select class="my-2 form-control" id="agent-dropdown">
+                      </select>
+                    </div>
+                    {% endif %}
+                    <div class="form-group">
+                      <label for="offical_ID_number">Offical ID Number</label>
+                      <input type="text" class="my-2 form-control" id="offical_ID_number"
+                        placeholder="Offical ID Number">
+                    </div>
+                    <div class="form-group">
+                      <label for="contact mt-2">Contact Information</label>
+                      <input type="number" class="my-2 form-control" id="contact" placeholder="Contact Information">
+                    </div>
+                    <button type="submit" class="btn btn-primary my-3">Submit</button>
+                  </div>
+                  <div class='col-lg-6 col-sm-12 col-md-12'>
+                    <div class="form-group m-0">
+                      <h1 class="quiz_title m-0">Gender</h1>
+                      <div class="row" style="font-weight: bold;">
+                        <div class="col-sm-4">
+                          <div class="quiz_card_area">
+                            <input class="quiz_checkbox" type="radio" name="gender" id="Male" value="male"
+                              checked="checked" />
+                            <div class="single_quiz_card">
+                              <div class="quiz_card_content">
+                                <div class="quiz_card_title">
+                                  <h3><i class="fa fa-check" aria-hidden="true"></i> Male</h3>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-sm-4">
+                          <div class="quiz_card_area">
+                            <input class="quiz_checkbox" type="radio" name="gender" id="Female" value="female"
+                              checked="checked" />
+                            <div class="single_quiz_card">
+                              <div class="quiz_card_content">
+                                <div class="quiz_card_title">
+                                  <h3><i class="fa fa-check" aria-hidden="true"></i> Female</h3>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group m-0">
+                      <h1 class="quiz_title mt-2">Driver Age</h1>
+                      <div class="row" style="font-weight: bold;">
+                        {% for age in driver_ages %}
+                        <div class="col-sm-4 ">
+                          <div class="quiz_card_area mx-1">
+                            <input class="quiz_checkbox" type="radio" name="age" id="{{age.id}}" value="{{age}}"
+                              checked="checked" />
+                            <div class="single_quiz_card">
+                              <div class="quiz_card_content">
+                                <div class="quiz_card_title">
+                                  <h3><i class="fa fa-check" aria-hidden="true"></i> {{age.number}}</h3>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <h1 class="quiz_title mt-2">Driver Category</h1>
+                      <div class="row" style="font-weight: bold;">
+                        {% for driver_category in driver_categories %}
+                        <div class="col-sm-4">
+                          <div class="quiz_card_area">
+                            <input class="quiz_checkbox" type="radio" name="driver_category" id="{{driver_category.id}}"
+                              value="{{driver_category}}" checked="checked" />
+                            <div class="single_quiz_card">
+                              <div class="quiz_card_content">
+                                <div class="quiz_card_title">
+                                  <h3><i class="fa fa-check" aria-hidden="true"></i> {{driver_category.name}}</h3>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    {% if companies.count <= 9 %} <div class="form-group">
+                      <h1 class="quiz_title mt-2">Company</h1>
+                      <div class="row" style="font-weight: bold;">
+                        {% for company in companies %}
+                        <div class="col-sm-4">
+                          <div class="quiz_card_area">
+                            <input class="quiz_checkbox" type="radio" name="company" id="{{company.id}}"
+                              value="{{company}}" checked="checked" />
+                            <div class="single_quiz_card">
+                              <div class="quiz_card_content">
+                                <div class="quiz_card_title">
+                                  <h3><i class="fa fa-check" aria-hidden="true"></i> {{company.name}}</h3>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                    <h1 class="quiz_title mt-2">Agents</h1>
+                    <div class="row" id="agents" style="font-weight: bold;">
+
+                    </div>
+                  </div>
+
+
+                  {% endif %}
+
+
+
+                  <div class="form-group m-0">
+                    <h1 class="quiz_title mt-2">Driver Nationality</h1>
+                    <div class="row" style="font-weight: bold;">
+                      {% for nationality in driver_nationality %}
+                      <div class="col-sm-4 m-0">
+                        <div class="quiz_card_area">
+                          <input class="quiz_checkbox" type="radio" name="nationality" id="{{nationality.id}}"
+                            value="{{nationality}}" checked="checked" />
+                          <div class="single_quiz_card">
+                            <div class="quiz_card_content">
+                              <div class="quiz_card_title">
+                                <h3><i class="fa fa-check" aria-hidden="true"></i> {{nationality.name}}</h3>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+
+            </div>
+            </form>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6" style="color: #7a7171; font-weight: bold;">
+            <div id="user_card" class='row'>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="form-group">
-    <label for="driver_category">Driver Category</label>
-    <input type="text" class="form-control" id="driver_category" placeholder="Driver Category">
-  </div>
-  <div class="form-group">
-    <label for="contact">Contact Information</label>
-    <input type="text" class="form-control" id="contact" placeholder="Contact Information">
-  </div>
-  <div class="form-group">
-    <label for="company">Company</label>
-    <input type="text" class="form-control" id="company" placeholder="Company">
-  </div>
-  <div class="form-group">
-    <label for="nationality">Nationality</label>
-    <input type="text" class="form-control" id="nationality" placeholder="Nationality">
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 
 </div>
+</div>
 <script>
-    $(document).ready(function () {
-        $("#registration-form").submit(function (event) {
-            event.preventDefault();
-            var username = $("#username").val();
-            var driver_category = $("#driver_category").val();
-            var contact = $("#contact").val();
-            var company = $("#company").val();
-            var nationality = $("#company").val();
-            var formData = {
-                'username': username,
-                'driver_category': driver_category,
-                'contact': contact,
-                'company': company,
-                'nationality': nationality
-            };
-            
 
-            $.ajax({
-                type: 'POST',
-                url: '/driver/',
-                data: formData,
-                dataType: 'json',
-                headers: { 'X-CSRFToken': csrftoken },
-                success: function (data) {
-                    console.log("Successfully sent data to server:", data);
-                },
-                error: function (data) {
-                    console.error("Failed to send data to server:", data);
-                }
+  // const input = document.getElementById("Company");
+  // const companyList = document.getElementById("company-list");
+  // let timeoutId = null;
+
+  // input.addEventListener("keyup", function () {
+  //   const value = this.value;
+  //   clearTimeout(timeoutId);
+
+  //   if (value.length >= 2) {
+  //     timeoutId = setTimeout(() => {
+  //       // Make an AJAX request to get the list of companies that match the input value
+  //       // The response should be an array of company names
+  //       $.ajax({
+  //         url: "/get-companies/",
+  //         data: {
+  //           "input": value
+  //         },
+  //         success: function (companies) {
+  //           // Clear the previous list of companies
+  //           companyList.innerHTML = "";
+  //           companyList.style.display = "block";
+
+  //           // Loop through the list of companies and add each one to the list
+  //           if (companies.length < 1) {
+  //             // If the input value is empty, clear the list of companies
+  //             const listItem = document.createElement("li");
+  //             listItem.textContent = 'No Result Has benn Found';
+  //             companyList.appendChild(listItem);
+  //           }
+  //           for (let i = 0; i < companies.length; i++) {
+  //             const company = companies[i];
+  //             const name = company.name;
+  //             const listItem = document.createElement("li");
+  //             listItem.textContent = name;
+
+  //             companyList.appendChild(listItem);
+
+  //           }
+  //         }
+  //       });
+  //     }, 1000);
+  //   } else {
+  //     companyList.style.display = "none";
+  //   }
+  // });
+  // 
+  // 
+  // companyList.addEventListener("click", function (event) {
+  //   const target = event.target;
+  //   companyList.style.display = "none";
+
+  //   if (target.tagName === "LI") {
+  //     // When a company is clicked, fill the input field with the company name
+  //     input.value = target.textContent;
+
+  //     // Clear the list of companies
+  //     companyList.innerHTML = "";
+  //   }
+  // });
+
+  $(document).ready(function () {
+    const radioButtons = $('input[name="company"]');
+    radioButtons.each(function () {
+      $(this).on('change', function () {
+        const company_name = $(this).val()
+        console.log(company_name)
+        $.ajax({
+          url: "/get-agent/",
+          data: { company_name: company_name },
+          dataType: "json",
+          success: function (data) {
+            const agentsDiv = $("#agents");
+            agentsDiv.html(""); // clear previous agents
+            $.each(data.agents, function (index, agent) {
+              console.log(agent.name)
+              const agentCard = $("<div class='col-sm-4'></div>");
+              agentCard.html(`
+                                <div class="quiz_card_area">
+                                <input class="quiz_checkbox" type="radio" name="agent" id="${agent.id}" value="${agent}" checked="checked" />
+                                  <div class="single_quiz_card">
+                                    <div class="quiz_card_content">
+                                      <div class="quiz_card_title">
+                                      <h3><i class="fa fa-check" aria-hidden="true"></i>${agent.name}</h3>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            `);
+              agentsDiv.append(agentCard);
             });
+          }
         });
+      });
+    })
+    $('#company-dropdown').select({
+      placeholder: 'Search for a company',
+      allowClear: true
     });
+
+    $('#company-dropdown').on('change', function () {
+      var company_name = $(this).val();
+      $.ajax({
+        url: '/get-agent/',
+        data: { company_name: company_name },
+        dataType: 'json',
+        success: function (data) {
+          var options = '';
+          $.each(data.agents, function (index, agent) {
+            options += '<option class="my-2 form-control"  value="' + agent.id + '">' + agent.name + '</option>';
+          });
+          $('#agent-dropdown').html(options);
+        }
+      });
+    });
+
+    $("#registration-form").submit(function (event) {
+      event.preventDefault();
+      var username = $("#username").val();
+      var selected_driver_category = $("input[name='driver_category']:checked").val();
+      var gender = $("input[name='gender']:checked").val();
+      var selected_age = $("input[name='age']:checked").val();
+      var selected_nationality = $("input[name='nationality']:checked").val();
+      var company = $("#Company").val();
+      // var agent = $("#Agent").val();
+
+      var contact = $("#contact").val();
+      var full_name = $("#full_name").val();
+      var offical_ID_number = $("#offical_ID_number").val();
+      // var company = $("#company").val();
+      var nationality = $("#nationality").val();
+      console.log(selected_driver_category)
+      var formData = {
+        'username': username,
+        'age': selected_age,
+        'driver_category': selected_driver_category,
+        'contact': contact,
+        'company': company,
+        'gender': gender,
+        // 'agent':agent,
+        'nationality': selected_nationality,
+        'full_name': full_name,
+        'offical_ID_number': offical_ID_number,
+      };
+      $.ajax({
+        type: 'POST',
+        url: '/driver/',
+        data: formData,
+        dataType: 'json',
+        headers: { 'X-CSRFToken': csrftoken },
+        success: function (response) {
+          if (response.status === "success") {
+            var successMessage = "<div class='alert alert-success' role='alert'>" + response.status + "</div>";
+            $("#registration-form").before(successMessage);
+
+            setTimeout(function () {
+
+              window.location.href = "/driver/";
+            }, 400);
+
+          } else if ((response.status === "redirect")) {
+            window.location.href = "/edit_driver_username/" + response.id;
+
+          } else {
+            var errorMessage = "<div class='alert alert-danger' role='alert'>" + response.status + "</div>";
+            $("#registration-form").before(errorMessage);
+          }
+        },
+        error: function (data) {
+          console.error("Failed to send data to server:", data);
+        }
+      });
+    });
+  });
 </script>
 {%endblock contents%}
+
+{% block customjs %}
+<script>
+  $(document).ready(function () {
+    // $('#Company').on('input', function () {
+    //   var input = $(this).val();
+    //   if (input.length >= 1) {
+    //     $.ajax({
+    //       url: "/get-companies/",
+    //       data: {
+    //         "input": input
+    //       },
+    //       success: function (companies) {
+    //         $("#company-list").empty();
+    //         for (var i = 0; i < companies.length; i++) {
+    //           var company = companies[i];
+    //           var name = company.name;
+    //           console.log(name)
+    //           $("#company-list").append("<a class='dropdown-item' href='#'>" + name + "</a>");
+    //         }
+    //       }
+    //     });
+    //   } else {
+    //     $("#company-list").empty();
+    //   }
+    // });
+
+    // $("#company-list").on("click", "a", function () {
+    //   var company_name = $(this).text();
+    //   $("#Company").val(company_name);
+    //   $("#company-list").empty();
+    // });
+
+
+
+
+
+    var timer;
+    $('#full_name').keyup(function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var searchValue = $("#full_name").val();
+        $.ajax({
+          type: 'GET',
+          url: '/user_search',
+          data: {
+            'search': searchValue
+          },
+          dataType: 'json',
+          success: function (data) {
+            $("#user_card").html('');
+            data.forEach(function (user) {
+              $("#user_card").append(
+                `<div class="col-12">
+                <div class="card">
+                                <div class="card-body ">
+                                  <a href="/edit_driver_username/${user.id}">
+                                    <h5 class="my-1 card-title">Username: ${user.username}</h5>
+                                    <p class=" my-1 card-text">Company: ${user.company}</p>
+                                  </a>
+                                  <p class="my-1 card-text">Current Attempts: ${user.current_attempts}</p>
+                                  <p class="my-1 card-text">Active: ${user.is_active ? "Yes" : "No"}</p>
+                                  <p class="my-1 card-text">Test Active: ${user.test_active ? "Yes" : "No"}</p>
+                                  <p class="my-1 card-text">Final English Score: ${user.final_en_score}</p>
+                                  <p class="my-1 card-text">Final Psychological Score: ${user.final_psyco_score}</p>
+                                </div>
+                              </div>
+                              </div>`
+              );
+            });
+          },
+          error: function (response) {
+            console.log('failed')
+            console.log(response)
+          }
+        });
+      }, 400);
+    });
+  });
+
+</script>
+{% endblock %}
+{% block customcss %}
+<style>
+  *,
+  *:before,
+  *:after {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+  }
+
+  :focus {
+    outline: 0px;
+  }
+
+  .quiz_title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #292d3f;
+    text-align: left;
+    margin: 5px;
+
+  }
+
+  .quiz_card_area {
+    position: relative;
+    margin: 5;
+
+  }
+
+  .single_quiz_card {
+    border: 1px solid #efefef;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+    -khtml-transition: all 0.3s linear;
+    transition: all 0.3s linear;
+    margin: 5;
+
+  }
+
+  .quiz_card_title {
+    padding: 14px;
+    text-align: center;
+    background-color: #d6d6d6;
+    margin: 5;
+
+  }
+
+  .quiz_card_title h3 {
+    font-size: 15px;
+    font-weight: bold;
+    color: #000000;
+    margin: 0;
+    -webkit-transition: all 0.4s linear;
+    -moz-transition: all 0.4s linear;
+    -o-transition: all 0.4s linear;
+    -ms-transition: all 0.4s linear;
+    -khtml-transition: all 0.4s linear;
+    transition: all 0.4s linear;
+  }
+
+  .quiz_card_title h3 i {
+    opacity: 0;
+  }
+
+  .quiz_card_content {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    white-space: normal;
+    margin: 0;
+
+  }
+
+  .quiz_checkbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    cursor: pointer;
+  }
+
+  .quiz_checkbox:checked~.single_quiz_card {
+    border: 1px solid #2575fc;
+  }
+
+  .quiz_checkbox:checked:hover~.single_quiz_card {
+    border: 1px solid #2575fc;
+  }
+
+  .quiz_checkbox:checked~.single_quiz_card .quiz_card_content .quiz_card_title {
+    background-color: #2575fc;
+    color: #ffffff;
+  }
+
+  .quiz_checkbox:checked~.single_quiz_card .quiz_card_content .quiz_card_title h3 {
+    color: #ffffff;
+  }
+
+  .quiz_checkbox:checked~.single_quiz_card .quiz_card_content .quiz_card_title h3 i {
+    opacity: 1;
+  }
+
+  .quiz_checkbox:checked:hover~.quiz_card_title {
+    border: 1px solid #2575fc;
+  }
+
+  #company-list {
+    display: none;
+    position: relative;
+    z-index: 4;
+    list-style: none;
+    padding: 5px;
+    margin: 0;
+    background-color: white;
+    border: 1px solid gray;
+    width: 100%;
+  }
+
+  #company-list li {
+    padding: 5px;
+
+  }
+
+  #company-list li:hover {
+    background-color: rgb(154, 211, 245);
+    cursor: pointer;
+  }
+</style>
+{% endblock %}

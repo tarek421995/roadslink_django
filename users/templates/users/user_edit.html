@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+{% extends 'shared_layout/lms_dashboard.html' %}
+
+{%block title%}
+login
+{%endblock title%}
+
+{%block contents%}
+<div class="pcoded-main-container">
+    <div class="pcoded-wrapper">
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card" data-aos="fade-up">
+                            <div class="card-body">
+                                {%if error%}
+                                <div class="alert alert-danger" role="alert">
+                                    {{error}}
+                                </div>
+                                {%endif%}
+                                <form method="post" class="mx-auto">
+                                    {%csrf_token%}
+                                    {%include 'users/form_snippets.html' with form=form%}
+
+                                    <input class="btn btn-primary" type="submit" value="Update">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock contents %}

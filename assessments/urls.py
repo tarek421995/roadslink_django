@@ -16,11 +16,12 @@ urlpatterns = [
          views.psycometric_tests_detail, name='psycometric_tests_detail'),
     path('evaluate_psycometric_test/',
          views.evaluate_psycometric_test, name='evaluate_psycometric_test'),
-     path('generate_pdf/<int:user_id>/', pdfviews.generate_pdf, name='generate_pdf'),
+    path('generate_pdf/<int:user_id>/<int:company_id>/',
+         pdfviews.generate_pdf, name='generate_pdf'),
     path('results/', views.results, name='results'),
-     path('audio', views.audio_qustion, name='audio'),
-     path('text', views.text_qustion, name='text'),
-     
+    path('audio', views.audio_qustion, name='audio'),
+    path('text', views.text_qustion, name='text'),
+
     path('questions/<int:question_id>/',
          views.question_detail, name='question_detail'),
 ]

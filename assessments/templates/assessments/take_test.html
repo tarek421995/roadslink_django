@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% extends 'shared_layout/base.html' %}
+{% extends 'shared_layout/base_test.html' %}
 
 {%block title%}
 Take Test
@@ -54,35 +54,44 @@ Take Test
 {%endblock customcss%}
 
 {%block contents%}
-{%if error%}
-<div class="alert alert-danger" role="alert">
-    {{error}}
-</div>
-{%endif%}
+<div class="pcoded-main-container">
+    <div class="pcoded-wrapper">
 
-<h1>Take Test: {{ test.name }}</h1>
-<form class="form-group" method="post">
-    {% csrf_token %}
-    <div class="form-group row">
-        <div class="col-md-6 question-divider">
-            <div class="form-check form-check-inline">
-                {% for field in form.visible_fields %}
-                <p>{{ field.label }}: {{ field }}</p>                
-                <input class="form-check-input" type="radio" name="{{ field.name }}" id="{{ field.auto_id }}"
-                    value="{{ field.value }}">
-                <label class="form-check-label" for="{{ field.auto_id }}">
-                    <i class="fa fa-circle-o"></i>
-                    <i class="fa fa-dot-circle-o"></i>
-                    {{ field.label }}
-                </label>
-                <hr>
-               
-                <p>{{ field.label }}: {{ field }}</p>
-                {% endfor %}
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content">
+                {%if error%}
+                <div class="alert alert-danger" role="alert">
+                    {{error}}
+                </div>
+                {%endif%}
+
+                <h1>Take Test: {{ test.name }}</h1>
+                <form class="form-group" method="post">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <div class="col-md-6 question-divider">
+                            <div class="form-check form-check-inline">
+                                {% for field in form.visible_fields %}
+                                <p>{{ field.label }}: {{ field }}</p>
+                                <input class="form-check-input" type="radio" name="{{ field.name }}"
+                                    id="{{ field.auto_id }}" value="{{ field.value }}">
+                                <label class="form-check-label" for="{{ field.auto_id }}">
+                                    <i class="fa fa-circle-o"></i>
+                                    <i class="fa fa-dot-circle-o"></i>
+                                    {{ field.label }}
+                                </label>
+                                <hr>
+
+                                <p>{{ field.label }}: {{ field }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <input type="submit" class="btn btn-primary" value="Submit">
+
+                </form>
             </div>
         </div>
     </div>
-    <input type="submit" class="btn btn-primary" value="Submit">
-
-</form>
+</div>
 {%endblock contents%}

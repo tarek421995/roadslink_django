@@ -2,26 +2,34 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from weasyprint import HTML,  CSS
-
+from .models import Test
+from users.models import Cretificate,CompanyCategory
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
   
-def generate_pdf(request, user_id):
+def generate_pdf(request, user_id,company_id):
     # Render the HTML template
-    user = User.objects.filter(id=user_id).first()
-    certificate = user.certificate
-    test_attemp = certificate.test_attemps.all().first().test
+    user = User.objects.get(id=user_id)
+    print(user)
+    
+    company= CompanyCategory.objects.get(id=company_id)
+    certificate = Cretificate.objects.filter(user=user,company=company).first()
+    print(certificate)
+    test = Test.objects.filter(type='en').first()
+    # test_attemp = certificate.test_attemps.all().first().test
+    # 210 x 297
     mycss = CSS(string=(
         "@page longpage {\n"
-        "    size: 400mm 400mm;\n"
+            "margin: 0;\n"
+        "    size: 350mm 400mm ;\n"
         "}"
         "body {\n"
         "   page: longpage;\n"
         "}\n"
     ))
     
-    html_template = render(request, 'assessments/certificate/pdf.html', {'data': certificate ,'test':test_attemp})
+    html_template = render(request, 'assessments/certificate/pdf.html', {'data': certificate ,'test':test})
 
     # Convert the HTML to a PDF
     pdf_file = HTML(string=html_template.content.decode('utf-8')).write_pdf(stylesheets=[mycss])

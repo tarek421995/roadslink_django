@@ -1,0 +1,84 @@
+{% extends 'shared_layout/lms_dashboard.html' %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-wrapper">
+        <div class="pcoded-content" style="color: #7a7171; font-weight: bold; font-size: large;">
+            <div class="pcoded-inner-content">
+                <h1 class="text-center">Generate Invoices</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="start_date">Start Date:</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="date" name="start_date">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="end_date">End Date:</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="date" name="end_date">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="company_name">Company Name:</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="text" name="company_name">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="agent_name">Agent Name:</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="text" name="agent_name">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-12 text-center">
+                            <input class="btn btn-primary" type="submit" value="Generate">
+                        </div>
+                    </div>
+                </form>
+
+                <!--[ Recent Users ] start-->
+                <div class="col-xl-12 col-md-6">
+                    <div class="card Recent-Users">
+                        <div class="card-header">
+                            <h5>Recent Invoices</h5>
+                        </div>
+                        <div class="card-block px-0 py-3">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <tbody>
+                                        {% for invoice in list_invoice %}
+                                        <tr class="mx-3">
+                                            <td class="m-auto">
+                                                <h6 class="mb-1">{{ invoice.create_by }} </h6>
+                                                <p class="m-0">{{ invoice.timestamp }}</p>
+                                            </td>
+                                            <td class="m-auto">
+                                                <h6 class="mb-1">{{ invoice.company.name }} </h6>
+                                            </td>
+                                            <td class="m-auto">
+                                                <h6 class="text-muted"><i class="fas fa-circle text-c-green f-10 m-r-15"></i>{{ invoice.invocies_file.type }}</h6>
+                                            </td>
+                                            
+                                            <td class="m-auto">
+                                                {% if invoice.start_date %} <h6 class="text-muted"><i class="fas fa-circle text-c-green f-10 m-r-15"></i> {{ invoice.start_date }} - {{ invoice.end_date }} </h6>{% else %}{% endif %} 
+                                            </td>
+                                            <td class="m-auto">
+                                                <a href="{% url 'users:download_invoice' invoice.id  %}" class="label theme-bg text-white f-12">Downlaod</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,44 +1,53 @@
 <!DOCTYPE html>
 
-{% extends 'shared_layout/base.html' %}
+{% extends 'shared_layout/lms_dashboard.html' %}
 
 {%block title%}
 audio
 {%endblock title%}
 {%block contents%}
-{%if error%}
-<div class="alert alert-danger" role="alert">
-    {{error}}
-</div>
-{%endif%}
-<form id="form" class="form-group">
-    <div class="form-group">
-        <input type="text" class="form-control" id="test_id" placeholder="Enter test ID">
-    </div>
-    <div class="form-group">
-        <input type="file" class="form-control-file" id="audioFile" name="audioFile" multiple="multiple">
-    </div>
-    <div class="form-group">
-        <input type="file" class="form-control-file" id="json" name="json">
-    </div>
-    <div class="form-group">
-        <input type="file" class="form-control-file" id="Questions" name="Questions">
-    </div>
+<div class="pcoded-main-container">
+    <div class="pcoded-wrapper">
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content">
+                {%if error%}
+                <div class="alert alert-danger" role="alert">
+                    {{error}}
+                </div>
+                {%endif%}
+                <form id="form" class="form-group">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="test_id" placeholder="Enter test ID">
+                    </div>
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" id="audioFile" name="audioFile" placeholder="audioFile"
+                            multiple="multiple">
+                    </div>
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" id="json" name="json">
+                    </div>
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" id="Questions" name="Questions">
+                    </div>
 
-    <button type="submit" id="submitBtn" class="btn btn-primary">Upload files</button>
-</form>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">Upload files</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     $(document).ready(function () {
         $("#form").submit(function (event) {
             event.preventDefault();
             var ins = document.getElementById('audioFile').files.length;
-					
-            if(ins == 0) {
+
+            if (ins == 0) {
                 $('#msg').html('<span style="color:red">Select at least one file</span>');
                 return;
             }
-            
-            
+
+
             var formData = new FormData();
             formData.append("test_id", $("#test_id").val());
 

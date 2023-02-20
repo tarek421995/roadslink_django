@@ -1,34 +1,30 @@
 from datetime import timedelta
-import io
-import json
-from django.utils import timezone
+import datetime
 from django.http import HttpResponse,HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import (
-    logout,
-)
 import pandas as pd
-
 from django.db.models.functions import Now
-from django.http import FileResponse
-import re
-
 from assessments.forms import SingleChoiceQuestionForm
-from users.views import logout_view
-from .models import Answer, Cretificate, Test, Question, TestAttempt, Psycometric
-# Create your views here.
+from .models import Answer, Test, Question, TestAttempt, Psycometric
+from users.models import Cretificate
 from django.contrib import messages
 import csv
 from .models import Test, Question, Choice
-from django.core.cache import cache
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
+
+@login_required()
 def test_list(request):
     user = request.user
     # certifiicate = user.cretificate
+    print(user.test_active)
     if not user.test_active:
         messages.error(
             request, 'Your account have no test active. Please pay the fees to reactivate your account.')
+        
     tests = list(Test.objects.filter(active=True).all())
+    print(tests)
     context = {'tests': tests, "user": user}
     return render(request, 'assessments/tests.html', context)
     
@@ -44,10 +40,13 @@ def calculate_score(answers):
 
 def question_list(request, test_id):
     user = request.user
-    test = cache.get(f'test:{test_id}')
-    if not test:
-        test = get_object_or_404(Test, id=test_id)
-        cache.set(f'test:{test_id}', test, 3600)
+    test = get_object_or_404(Test, id=test_id)
+    last_en_attemp = TestAttempt.objects.filter(user=user, test=test, type='en').all()
+    if not test.second_chance == 0 :
+        last_en_attemp = last_en_attemp.filter(created_at__lt=Now()-timedelta(hours=test.second_chance)).order_by('-created_at')
+        if last_en_attemp.count() > 1:
+            messages.warning(request, f"you have no pycometric tests avalible try after {test.second_chance} hours")
+            return redirect('assessments:test_list')
     question_number = test.number_question
     form = SingleChoiceQuestionForm(test=test, question_number=question_number)
     total_score = 0
@@ -73,7 +72,7 @@ def question_list(request, test_id):
         else:
             mark = "failed"
         test_attempts = TestAttempt.objects.create(
-            user= user, test=test,final_mark=mark,type='en', final_score=total_score)
+            user= user, test=test,final_mark=mark,type='en',company=user.company, final_score=total_score)
         test_attempts.save()
         if not test.do_all_must:
             return redirect('assessments:test_list')
@@ -90,10 +89,14 @@ def psycometric_tests(request):
     if test.count() == 0:
         messages.warning(request, "you have no pycometric tests avalible")
         return redirect('assessments:test_list')
-
     test = test.first()
     last_psyco_attemp = TestAttempt.objects.filter(user=user, test=test, type='psyc').all()
-    last_psyco_attemp.filter(created_at__lt=Now()-timedelta(hours=test.second_chance)).order_by('-created_at')
+    now = timezone.now()
+    print(now)
+    d = now - timedelta(hours=2)
+    print(d)
+    last_psyco_attemp.filter(created_at__lt=Now()-timedelta(hours=1)).order_by('-created_at')
+    print('last 48 tries',last_psyco_attemp)
     psyco_ids = []
     for attemp in last_psyco_attemp:
         psyco_ids.append(attemp.psycometric.id)
@@ -105,8 +108,6 @@ def psycometric_tests(request):
         return redirect('assessments:results')
     context = {'question': active_notpassed_psyco.first(), 'test': test, 'active_notpassed_psyco': active_notpassed_psyco}
     return render(request, 'assessments/psycometric_test.html', context)
-
-
 
 
 def evaluate_psycometric_test(request):
@@ -128,7 +129,7 @@ def evaluate_psycometric_test(request):
     last_passed_psyco_attemp = TestAttempt.objects.filter(user=user, test=test, type='psyc').all()
     last_passed_psyco_attemp.filter(created_at__lt=Now()-timedelta(hours=test.second_chance)).order_by('-created_at')
     test_attemp = TestAttempt.objects.create(
-        user=user, test=test, psycometric=psycometric, final_score=final_score, final_mark=mark, type="psyc")
+        user=user, test=test, psycometric=psycometric, final_score=final_score,company=user.company, final_mark=mark, type="psyc")
     test_attemp.save()
     # print(last_passed_psyco_attemp)
     if not test.do_all_must:
@@ -136,9 +137,9 @@ def evaluate_psycometric_test(request):
     if last_passed_psyco_attemp.count() == 0:
         print('you have to try after two days')
         return JsonResponse({'url': '/assessments/results'}, status=202)
-    
-
     return JsonResponse({'url': '/assessments/psycometric_test'}, status=202)
+
+
 
     # if test_attemp:
 
@@ -155,7 +156,6 @@ def psycometric_tests_detail(request,psyco_id):
     context = {'question': psyco, 'test': test}
     return render(request, 'assessments/psycometric_test.html', context)
 
-
 def question_detail(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     choices = list(Choice.objects.filter(question=question))
@@ -165,6 +165,7 @@ def question_detail(request, question_id):
 
 def validate_and_save_answers(request):
     answers = request.POST
+    
     print(answers)
     for question_id, choice_id in answers.items():
         print(question_id, choice_id)
@@ -187,35 +188,32 @@ def english_questions(request):
         questions = list(Question.objects.all())
         context = {'questions': questions}
         return render(request, 'all_questions.html', context)
-
-from django.core.files.base import ContentFile
-
-
+    
+ 
 def results(request):
     user_answers = Answer.objects.filter(user=request.user)
     correct_answers = user_answers.filter(choice__is_correct=True)
     user = request.user
     current_attempts = TestAttempt.objects.filter(user=user)
-    print(current_attempts.count())
     can_print= user.print_certificate
-    print(can_print)
     if can_print:
         all_passed = current_attempts.filter(final_mark='passed')
         en = all_passed.filter(type='en')
+        if en.count() <= 0 :
+            messages.success(request,'you have no active psycometric test')
+            return redirect('assessments:test_list')
         all_psyco = TestAttempt.objects.filter(user=user,type='psyc',final_mark='passed')
-        
-        print('all_psycp',all_psyco.count())
         try:
-            certificate = Cretificate.objects.create(user=user)
+            certificate , = Cretificate.objects.get_or_create(user=user, company=user.company)
         except:
             certificate = Cretificate.objects.get(user=user)
 
         psyco_sum = 0
-        i=0
+        
+        i = 0
         
         certificate.test_attemps.set('')
         test = en.last().test
-        print(test)
         certificate.test_attemps.add(en.last())
         psyco_list = []
         for psyco in all_psyco:
@@ -227,20 +225,18 @@ def results(request):
         certificate.final_en_score = en.last().final_score
         certificate.final_psyco_score = psyco_avg
         certificate.save()
-        print(certificate.test_attemps.count())
-        
-    
     context = {
-        'total_en_questions': test.number_question,
+        'total_en_questions': '100',
         'total_en_answers': user_answers.count(),
         'correct_en_answers': correct_answers.count(),
         'current_attempts':current_attempts.order_by('-type')
-        
     }
     return render(request, 'assessments/results.html', context)
 
 # from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
+
+
 # @csrf_exempt
 def audio_qustion(request):    
     if request.method == 'POST':

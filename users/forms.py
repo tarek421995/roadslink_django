@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
@@ -5,7 +6,7 @@ from django.forms import widgets
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
 from django import forms
-from users.models import OtpCode
+from users.models import CustomUser, OtpCode
 User = get_user_model()
 
 
@@ -74,24 +75,119 @@ class RegisterForm(UserCreationForm):
 #         return email
 
 
+# class DriversRegisterForm(forms.ModelForm):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'driver_category', 'contact',
+#                   'final_score', 'company', 'nationality']
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['username'].widget.attrs['class'] = 'form-control'
+#         self.fields['username'].widget.attrs['placeholder'] = 'Username'
+#         self.fields['driver_category'].widget.attrs['class'] = 'form-control'
+#         self.fields['driver_category'].widget.attrs['placeholder'] = 'Driver Category'
+#         self.fields['contact'].widget.attrs['class'] = 'form-control'
+#         self.fields['contact'].widget.attrs['placeholder'] = 'Contact Information'
+#         self.fields['company'].widget.attrs['class'] = 'form-control'
+#         self.fields['company'].widget.attrs['placeholder'] = 'Company'
+#         self.fields['nationality'].widget.attrs['class'] = 'form-control'
+#         self.fields['nationality'].widget.attrs['placeholder'] = 'Nationality'
+
+# class DriverEditForm(forms.ModelForm):
+#     class Meta:
+#         model = CustomUser
+#         fields = [
+#             'username',
+#             'full_name',
+#             'driver_category',
+#             'contact',
+#             'company',
+#             'nationality',
+#             'test_active'
+#         ]
+#         widgets = {
+#             'username': forms.TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Username'}),
+#             'full_name': forms.TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Full Name'}),
+#             'driver_category': forms.Select(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Driver Category'}),
+#             'contact': forms.NumberInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Contact'}),
+#             'company': forms.Select(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Company'}),
+#             'nationality': forms.TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Nationality'}),
+#             'test_active': forms.CheckboxInput(attrs={'class': 'form-control'}),
+#         }
+
+
 class DriversRegisterForm(forms.ModelForm):
     class Meta:
-        model = User
-        fields = ['username', 'driver_category', 'contact',
-                  'final_score', 'company', 'nationality']
+        model = CustomUser
+        fields = [
+            'full_name',
+            'source',
+            'contact',
+            'company',
+            'nationality',
+            'offical_ID_number',
+            'age',
+            'test_active'
+        ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs['class'] = 'form-control'
-        self.fields['username'].widget.attrs['placeholder'] = 'Username'
-        self.fields['driver_category'].widget.attrs['class'] = 'form-control'
-        self.fields['driver_category'].widget.attrs['placeholder'] = 'Driver Category'
-        self.fields['contact'].widget.attrs['class'] = 'form-control'
-        self.fields['contact'].widget.attrs['placeholder'] = 'Contact Information'
-        self.fields['company'].widget.attrs['class'] = 'form-control'
-        self.fields['company'].widget.attrs['placeholder'] = 'Company'
-        self.fields['nationality'].widget.attrs['class'] = 'form-control'
-        self.fields['nationality'].widget.attrs['placeholder'] = 'Nationality'
+        widgets = {
+            'bio': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'bio'}),
+            'full_name': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'Full Name'}),
+            'offical_ID_number': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'offical ID number'}),
+            'driver_category': forms.Select(attrs={'class': 'form-control',  'placeholder': 'Driver Category'}),
+            'contact': forms.NumberInput(attrs={'class': 'form-control',  'placeholder': 'Contact'}),
+            'company': forms.Select(attrs={'class': 'form-control',  'placeholder': 'Company'}),
+            'nationality': forms.Select(attrs={'class': 'form-control',  'placeholder': 'Nationality'}),
+            'age': forms.Select(attrs={'class': 'form-control',  'placeholder': 'age'}),
+            'source': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'source'}),
+        }
+
+        def clean_username(self):
+            username = self.cleaned_data['username']
+            if get_user_model().objects.filter(username=username).exists():
+                raise ValidationError("This username is already taken.")
+            return username
+
+        def clean_full_name(self):
+            full_name = self.cleaned_data['full_name']
+            if get_user_model().objects.filter(full_name=full_name).exists():
+                raise ValidationError("This full_name is already taken.")
+            return full_name
+
+        def clean_contact(self):
+            contact = self.cleaned_data['contact']
+            if get_user_model().objects.filter(contact=contact).exists():
+                raise ValidationError("This contact number is already taken.")
+            return contact
+
+
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = [
+            'full_name',
+            'profile_picture',
+            'bio',
+            'source',
+            'contact',
+            'company',
+            'nationality',
+            'offical_ID_number',
+            'age',
+        ]
+
+        widgets = {
+            'bio': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'bio'}),
+            'full_name': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'Full Name'}),
+            'offical_ID_number': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'offical ID number'}),
+            'driver_category': forms.Select(attrs={'class': 'form-control',  'placeholder': 'Driver Category'}),
+            'contact': forms.NumberInput(attrs={'class': 'form-control',  'placeholder': 'Contact'}),
+            'company': forms.Select(attrs={'class': 'form-control',  'placeholder': 'Company'}),
+            'nationality': forms.Select(attrs={'class': 'form-control',  'placeholder': 'Nationality'}),
+            'age': forms.Select(attrs={'class': 'form-control',  'placeholder': 'age'}),
+            'source': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'source'}),
+        }
 
 
 class ForgetPasswordEmailCodeForm(forms.Form):
@@ -171,3 +267,51 @@ class OtpForm(forms.Form):
             )
         else:
             return otp_code
+
+
+User = get_user_model()
+
+
+class ContactForm(forms.Form):
+    full_name = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control border-0 bg-light px-4",
+                "placeholder": "Your full name"
+            }
+        )
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control border-0 bg-light px-4",
+                "placeholder": "Your email"
+            }
+        )
+    )
+    subject = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+
+                "class": "form-control border-0 bg-light px-4",
+                "placeholder": "Subject"
+            }
+        )
+    )
+    content = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                'class': 'form-control border-0 bg-light px-4 py-3',
+                "placeholder": "Your message"
+            }
+        )
+    )
+
+    # def clean_email(self):
+    #     email = self.cleaned_data.get("email")
+    #     if not "gmail.com" in email:
+    #         raise forms.ValidationError("Email has to be gmail.com")
+    #     return email
+
+    # def clean_content(self):
+    #     raise forms.ValidationError("Content is wrong.")

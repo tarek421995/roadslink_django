@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Test, QuestionCategory, DriverCategory, Question, Psycometric, Choice, Answer, TestAttempt
+from .models import Test, QuestionCategory, Question, Psycometric, Choice, Answer, TestAttempt
 
 class QuestionInline(admin.TabularInline):
     model = Question
@@ -60,8 +60,8 @@ class AnswerAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
 
 class TestAttemptAdmin(admin.ModelAdmin):
-    list_display = ('user', 'test', 'final_mark', 'timestamp')
-    list_filter = ('final_mark',)
+    list_display = ('user', 'test', 'final_mark','timestamp')
+    list_filter = ('final_mark','user__username',)
     search_fields = ('user__username', 'test__name')
     ordering = ('-timestamp',)
     actions = ['make_passed', 'make_failed']

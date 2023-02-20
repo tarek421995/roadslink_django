@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-{% extends 'shared_layout/base.html' %}
+{% extends 'shared_layout/base_test.html' %}
 
 {%block title%}
 ENGLISH TEST
@@ -62,15 +62,15 @@ ENGLISH TEST
     </div>
 </div>
 <!-- Add an introduction content like( video and text) before start the actual test and timer in this page , after the user clicks on start the test hide the interduction content and replace it the test question-->
-<div class="introduction-content text-center" id="intro-content">
+<div class="introduction-content text-center m-5" id="intro-content">
     <p>Welcome to the <b>{{ test.name }} </b>test.</p>
     <p>This test will consist of <b>{{ test.number_question }}</b> questions and you will have <b>{{ test.time_limit}}</b> minutes to
         complete it.</p>
-    <p>{{test.descriptions}}</p>
+    <p>{{test.descriptions.html|safe}}</p>
     <button class="btn btn-primary" id="start-test-btn">Start Test</button>
 </div>
-<div class="test-content" id="test-content" style="display:none;">
-    <div id="timer" class="m-3 " style="display: none;"></div>
+<div class="test-content m-auto mb-5 w-75 " id="test-content" style="display:none; align-content: center;">
+    <div id="timer" class="m-3 " style="display: none; z-index: 999;"></div>
 
     <form method="post" action="{% url 'assessments:question_list' test.id %}">
         {% csrf_token %}

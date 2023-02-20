@@ -5,9 +5,9 @@ import os
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 import pandas as pd
-
+from django_quill.fields import QuillField
+from django.template.loader import render_to_string
 from core.models import HashableModel
-
 
 User = settings.AUTH_USER_MODEL
 # Create your models here.
@@ -59,13 +59,14 @@ class QuestionCategory(HashableModel):
 
 class DriverCategory(HashableModel):
     name = models.CharField(max_length=20, null=True)
+    fees = models.IntegerField(blank=True, null=True)
     en_passing_rate = models.PositiveIntegerField(default=0)
     pscy_passing_rate = models.PositiveIntegerField(default=0)
 
     class Meta:
         indexes = [
             models.Index(
-                fields=['name', 'en_passing_rate', 'pscy_passing_rate']),
+                fields=['name','fees', 'en_passing_rate', 'pscy_passing_rate']),
         ]
 
     def __str__(self):
@@ -83,8 +84,6 @@ class Test(HashableModel):
     timestamp = models.DateTimeField(auto_now_add=True, null=True)
     type = models.CharField(max_length=10, choices=TEST_TYPE, default='')
     active = models.BooleanField(default=True)
-    certificate_file = models.FileField(
-        upload_to=upload_file_path, null=True, blank=True)
     english_Questions = models.FileField(
         upload_to=upload_file_path, null=True, blank=True)
     audio_Questions = models.FileField(
@@ -100,13 +99,13 @@ class Test(HashableModel):
         upload_to=upload_file_path, null=True, blank=True)
     certificate_html = models.FileField(
         upload_to=upload_file_path, null=True, blank=True)
-    descriptions = models.CharField(max_length=555, null=True,blank=True)
+    descriptions = QuillField(blank=True,null=True)
+    report_page = models.TextField(blank=True, null=True)  # modified
     
-
     class Meta:
         indexes = [
-            models.Index(fields=['name','certificate_image','tutorial_path','certificate_html', 'certificate_file', 'type', 'number_question',
-                         'maximum_attempts', 'psycometric_must', 'do_all_must','descriptions']),
+            models.Index(fields=['name','certificate_image','tutorial_path','certificate_html', 'type', 'number_question',
+                         'maximum_attempts','report_page', 'psycometric_must', 'do_all_must','descriptions']),
         ]
 
     def __str__(self):
@@ -148,16 +147,25 @@ class Test(HashableModel):
             # raise ValueError("Number of questions is greater than the number of questions available")
         return random.sample(list(questions), number_of_questions)
 
+    def get_report_template(self):
+        """
+        Returns the report page template for the test
+        """
+        return self.report_page
 
-QUESTION_TYPE = (
-    ('text', 'text'),
-    ('audio', 'audio'),
-)
+    def set_report_template(self, template):
+        """
+        Sets the report page template for the test
+        """
+        self.report_page = template
+        
+        
+
 
 @receiver(post_save, sender=Test)
 def handle_uploaded_excel_file(sender, created, instance, **kwargs):
     if not instance.type == "en":
-        instance.question_set.all().delete()       
+        instance.question_set.filter(type='text').delete()       
         return
     if not instance.english_Questions:
         return
@@ -178,7 +186,6 @@ def handle_uploaded_excel_file(sender, created, instance, **kwargs):
         for i in range(len(question_text)):
             category, created = QuestionCategory.objects.get_or_create(
                 name=sheet_name)
-            print(correct_answer[i])
             # create the Question object
             question = Question.objects.create(
                 test=instance,
@@ -213,6 +220,10 @@ def handle_uploaded_excel_file(sender, created, instance, **kwargs):
             )
 post_save.connect(handle_uploaded_excel_file, sender=Test)
 
+QUESTION_TYPE = (
+    ('text', 'text'),
+    ('audio', 'audio'),
+)
 
 class Question(HashableModel):
     test = models.ForeignKey(Test, on_delete=models.CASCADE, null=True)
@@ -231,6 +242,15 @@ class Question(HashableModel):
     def __str__(self):
         return self.text
 
+@receiver(post_save, sender=Question)
+def handle_delete(sender, created, instance, **kwargs):
+    questions = Question.objects.filter(type='audio')
+    for question in questions:
+        if not question.file:
+            question.delete() 
+    
+    post_save.connect(handle_uploaded_excel_file, sender=Test)
+
 
 class Psycometric(HashableModel):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -240,8 +260,7 @@ class Psycometric(HashableModel):
     file = models.FileField(
         upload_to=upload_file_path, null=True, blank=True)
     tutorial_path = models.URLField(max_length=200,null=True, blank=True)
-
-    description = models.TextField(max_length=500, null=True, blank=True)
+    description = QuillField(blank=True,null=True)
     timestamp = models.DateTimeField(auto_now_add=True, null=True)
     time_limit = models.PositiveIntegerField(default=7)
     must = models.BooleanField(default=True)
@@ -304,6 +323,7 @@ class TestAttempt(HashableModel):
     final_mark = models.CharField(
         max_length=10, choices=FINAL_MARK, default='not_taken')
     created_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    company = models.ForeignKey('users.CompanyCategory',on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -314,37 +334,6 @@ class TestAttempt(HashableModel):
     def __str__(self):
         return f'{self.final_mark} {self.test} {self.psycometric}'
 
-
-class Cretificate(HashableModel):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, null=True, blank=True, related_name='certificate')
-    test_attemps = models.ManyToManyField(TestAttempt)
-    final_en_score = models.FloatField(default=0)
-    final_psyco_score = models.FloatField(default=0)
-    timestamp = models.DateTimeField(auto_now_add=True, null=True)
-    created_at = models.DateTimeField(auto_now=True, blank=True, null=True)
-    code = models.CharField(max_length=10, default='72109C87')
-    
-    class Meta:
-        indexes = [
-            models.Index(fields=['user', 'final_en_score',
-                         'final_psyco_score', 'timestamp', 'created_at']),
-        ]
-
-    def __str__(self):
-        return f'{self.user} => Psych: {self.final_psyco_score}, English: {self.final_en_score}'
-
-    def check_certificate(self):
-        if self.final_en_score >= self.user.driver_category.en_passing_rate and self.final_psyco_score >= self.user.driver_category.pscy_passing_rate:
-            return True
-        else:
-            i = 0
-            for marks in self.test_attemps:
-                if marks.final_mark == 'passed':
-                    i = +1
-            if i == self.test_attemps.count():
-                return True
-            return False
 
 
 @receiver(pre_save, sender=TestAttempt)
@@ -357,9 +346,51 @@ def increment_attempt(sender, instance, **kwargs):
     current_attempts_count = current_attempts.count()
     user.current_attempts = current_attempts_count + 1
     if not user.is_superuser:
-        user.test_active = False
+        user.test_active = True
     user.save()
     instance.current_attempt = current_attempts_count + 1
 
 
 pre_save.connect(increment_attempt, sender=TestAttempt)
+
+class TestReport(HashableModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True)
+    test_attemp = models.OneToOneField(TestAttempt, on_delete=models.CASCADE,)
+    type = models.CharField(max_length=10,)
+    description = models.CharField(max_length=1000)
+    report_template = models.TextField(null=True)  # added
+
+
+    def get_report(self):
+        """
+        Returns the rendered report page for the test attempt
+        """
+        user = self.user
+        timestamp = self.timestamp
+        test_attemp = self.test_attemp
+        description = self.description
+        context = {'user':user,'timestamp':timestamp, 'test_attemp':test_attemp,'description':description}  # context dictionary to pass data to the report template
+        # Populate the context dictionary with data from the test attempt
+        # ...
+        # Render the report template with the populated context dictionary
+        report = render_to_string(self.report_template, context)
+        return report
+
+    def set_report_template(self, template):
+        """
+        Sets the report page template for the test report
+        """
+        self.report_template = template
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'test_attemp',
+                         'type', 'timestamp','report_template', 'description']),
+        ]
+
+    def __str__(self):
+        return f'{self.user}'
+
+   
+    

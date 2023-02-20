@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% extends 'shared_layout/base.html' %}
+{% extends 'shared_layout/base_test.html' %}
 {% load static %}
 {%block title%}
 Assessments
@@ -63,8 +63,8 @@ Assessments
 <div class="alert alert-danger" role="alert">
     {{error}}
 </div>
-{%endif%}
-<div class="container text-center my-5" id="intro-div">
+{% endif %}
+<div class="container text-center m-auto my-5" id="intro-div">
     <div class="card">
         <div class="card-header">
             <h2>{{ test.name }}</h2>
@@ -72,7 +72,8 @@ Assessments
         <div class="introduction-content" id="intro-video">
             <h3>Introduction</h3>
             <p>Welcome to the test, before you start please watch the following video for instructions.</p>
-            <iframe width="720" height="500" src="{{question.tutorial_path}}" title="YouTube video player" frameborder="0"
+            <iframe width="720" height="500" src="{{question.tutorial_path}}" title="YouTube video player"
+                frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen></iframe>
         </div>
@@ -83,122 +84,132 @@ Assessments
     <p>Welcome to the {{ test.name }} test.</p>
     <p>This test will consist of {{ test.number_question }} questions and you will have {{ test.time_limit }} minutes to
         complete it.</p>
-    <p>{{ quetion.description }} .</p>
+    <p>{{ quetion.description.html|safe }} .</p>
     <button class="btn btn-primary" id="start-test-btn">Start Test</button>
 </div>
-<div id="timer" class="m-3 " style="display: none;"></div>
+<div id="timer" class="m-3 " style="display: none; z-index: 999;"></div>
 
+{% if question.text == 'visualAttention' %}
 <div class="test-content" id="test-content" style="display:none;">
-    <div id="container"></div>
-</div>
-{%block customjs%}
-<script src="https://unpkg.com/konva@8.3.12/konva.min.js"></script>
+    {% else %}
+    <div class="test-content" id="test-content" style="display:none; margin-left: 23%; margin-top: 8%;">
+
+        {% endif %}
+        <div id="container"></div>
+    </div>
+    <div style="display:none;">
+        <img id="myImage" src="{% static 'images/visualAttention.svg' %}" alt="My Image">
+    </div>
+    {%block customjs%}
+    <script src="https://unpkg.com/konva@8.3.12/konva.min.js"></script>
 
 
-<script>
-    var test_id = '{{ test.id|safe }}';
-    var question_id = '{{ question.id|safe }}';
-    var startTestBtn = document.getElementById("start-test-btn");
-    var introContent = document.getElementById("intro-content");
-    var introVideo = document.getElementById("intro-div");
-    var testContent = document.getElementById("test-content");
-    var timer = document.getElementById("timer");
-    var minutes = '{{ test.time_limit|safe }}'
-    console.log(minutes)
-    var seconds = 0;
-    var intervalId;
+    <script>
+        var test_id = '{{ test.id|safe }}';
+        var question_id = '{{ question.id|safe }}';
+        var startTestBtn = document.getElementById("start-test-btn");
+        var introContent = document.getElementById("intro-content");
+        var introVideo = document.getElementById("intro-div");
+        var testContent = document.getElementById("test-content");
+        var timer = document.getElementById("timer");
+        var minutes = '{{ test.time_limit|safe }}'
+        console.log(minutes)
+        var seconds = 0;
+        var intervalId;
 
-    startTestBtn.addEventListener("click", function () {
-        introContent.style.display = "none";
-        introVideo.style.display = "none";
-        testContent.style.display = "block";
-        timer.style.display = "block";
-        intervalId = setInterval(function () {
-            seconds--;
-            if (seconds < 0) {
-                minutes--;
-                seconds = 59;
-            }
-            if (minutes < 0) {
-                clearInterval(intervalId);
-                alert("Time's up! submitting the test automatically");
-                // document.forms[0].submit();
-            }
-            else {
-                timer.innerHTML = minutes + " : " + (seconds < 10 ? 0 : "") + seconds;
-                if (minutes == 0 && seconds < 59) {
-                    $("#timer").addClass("flash-red");
+        startTestBtn.addEventListener("click", function () {
+            introContent.style.display = "none";
+            introVideo.style.display = "none";
+            testContent.style.display = "block";
+            timer.style.display = "block";
+            intervalId = setInterval(function () {
+                seconds--;
+                if (seconds < 0) {
+                    minutes--;
+                    seconds = 59;
                 }
+                if (minutes < 0) {
+                    clearInterval(intervalId);
+                    alert("Time's up! submitting the test automatically");
+                    // document.forms[0].submit();
+                }
+                else {
+                    timer.innerHTML = minutes + " : " + (seconds < 10 ? 0 : "") + seconds;
+                    if (minutes == 0 && seconds < 59) {
+                        $("#timer").addClass("flash-red");
+                    }
+                }
+            }, 1000);
+        });
+        document.addEventListener("fullscreenchange", function () {
+            if (!document.fullscreenElement) {
+                console.log('return back to full screen ')
+                alert('Error attempting to Exit full-screen mode').addClass("alert alert-danger");
+                // const messages = document.getElementById("messages-list");
+                // messages.innerHTML += response.msg;
+                // fade_alerts();
+                // document.documentElement.requestFullscreen();
+                // window.location.href = "/logout";
             }
-        }, 1000);
-    });
-    document.addEventListener("fullscreenchange", function () {
-        if (!document.fullscreenElement) {
-            console.log('return back to full screen ')
-            alert('Error attempting to Exit full-screen mode').addClass("alert alert-danger");
-            // const messages = document.getElementById("messages-list");
-            // messages.innerHTML += response.msg;
-            // fade_alerts();
-            // document.documentElement.requestFullscreen();
-            // window.location.href = "/logout";
-        }
-    });
-    document.addEventListener("keydown", function (event) {
-        if (event.keyCode === 122) {
-            event.preventDefault();
-        }
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            window.location.href = "/logout";
-        }
-    });
-    document.addEventListener('contextmenu', event => event.preventDefault());
+        });
+        document.addEventListener("keydown", function (event) {
+            if (event.keyCode === 122) {
+                event.preventDefault();
+            }
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                window.location.href = "/logout";
+            }
+        });
+        document.addEventListener('contextmenu', event => event.preventDefault());
 
-    document.addEventListener("keydown", function (e) {
-        if (e.ctrlKey && (e.key === "c" || e.key === "v")) {
-            e.preventDefault();
-        }
-    });
-    document.addEventListener("click", function (event) {
-        if (event.button !== 0) {
-            event.preventDefault();
-        }
-    });
+        document.addEventListener("keydown", function (e) {
+            if (e.ctrlKey && (e.key === "c" || e.key === "v")) {
+                e.preventDefault();
+            }
+        });
+        document.addEventListener("click", function (event) {
+            if (event.button !== 0) {
+                event.preventDefault();
+            }
+        });
 
-    // Disable F12 developer tools
-    document.onkeydown = function (e) {
-        if (event.keyCode == 123) {
-            return false;
+        // Disable F12 developer tools
+        document.onkeydown = function (e) {
+            if (event.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'S'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'P'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'T'.charCodeAt(0)) {
+                return false;
+            }
         }
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'S'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode == 'P'.charCodeAt(0)) {
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode == 'T'.charCodeAt(0)) {
-            return false;
-        }
-    }
-</script>
-<script src="{{ question.file.url }}">
-</script>
+    </script>
 
-{%endblock customjs%}
-{%endblock contents%}
+    <script src="{{ question.file.url }}">
+
+    </script>
+
+    {%endblock customjs%}
+    {%endblock contents%}

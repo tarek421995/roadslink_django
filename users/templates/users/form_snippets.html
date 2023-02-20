@@ -1,13 +1,14 @@
-<div class="row lg-3">
+<div class="row lg-3 mx-auto">
     <div class="col-sm-6 {%if center%} mx-auto {%endif%}">
         {% for field in form %}
         <div class="form-group mb-3">
-            {{field}}
+            <b>{{field.label_tag}}</b> {{field}}
             {% if field.errors %}
             {% for error in field.errors %}
             <span class="invalid-feedback {%if error%}d-block{%endif%}">{{error}}</span>
             {% endfor %}
             {%endif%}
+
         </div>
         {% endfor %}
     </div>    
